@@ -24,6 +24,7 @@ namespace ImageMorpher
 		bool makingLine = false;
 		bool editingStart = false;
 		bool editingEnd = false;
+		bool editingMiddle = false;
 		int editIndex = 0;
 		Point mouseDownPos;
 		ControlPoint prevEnd;
@@ -72,6 +73,11 @@ namespace ImageMorpher
 			{
 				return;
 			}
+			if (controlLines.Count > 0)
+			{
+				deHighlightLine(editIndex);
+				otherViewer.deHighlightLine(editIndex);
+			}
 			mouseDownPos = e.GetPosition(grid);
 			ControlPoint downControlPoint = new ControlPoint(mouseDownPos);
 			if (controlLineDict.ContainsKey(downControlPoint))
@@ -85,6 +91,10 @@ namespace ImageMorpher
 				highlightLine(editIndex);
 				currentLine = cl;
 				if (downControlPoint.CompareTo(cl.Middle) == 0) {
+					editingMiddle = true;
+					prevEnd = cl.End;
+					prevMid = downControlPoint;
+					prevStart = cl.Start;
 					return;
 				}
 				if (downControlPoint.CompareTo(cl.Start) == 0)
@@ -142,6 +152,10 @@ namespace ImageMorpher
 			{
 				currentLine.setEnd(new ControlPoint(mousePos));
 			}
+			if (editingMiddle)
+			{
+				currentLine.moveMiddle(new ControlPoint(mousePos));
+			}
 		}
 
 		private void createLineDrag(Point mousePos)
@@ -195,8 +209,6 @@ namespace ImageMorpher
 					controlLineDict.Add(currentLine.Middle, startList);
 				}
 				editingEnd = false;
-				otherViewer.deHighlightLine(editIndex);
-				deHighlightLine(editIndex);
 			}
 
 			if (editingStart)
@@ -217,7 +229,7 @@ namespace ImageMorpher
 				currentLine.setMiddle();
 				if (controlLineDict.ContainsKey(currentLine.Start))
 				{
-					controlLineDict[currentLine.End].Add(currentLine);
+					controlLineDict[currentLine.Start].Add(currentLine);
 				}
 				else
 				{
@@ -236,8 +248,59 @@ namespace ImageMorpher
 					controlLineDict.Add(currentLine.Middle, startList);
 				}
 				editingStart = false;
-				otherViewer.deHighlightLine(editIndex);
-				deHighlightLine(editIndex);
+			}
+			if (editingMiddle)
+			{
+				List<ControlLine> pointList = controlLineDict[prevStart];
+				pointList.Remove(currentLine);
+				if (pointList.Count == 0)
+				{
+					controlLineDict.Remove(prevStart);
+				}
+				pointList = controlLineDict[prevMid];
+				pointList.Remove(currentLine);
+				if (pointList.Count == 0)
+				{
+					controlLineDict.Remove(prevMid);
+				}
+				pointList = controlLineDict[prevEnd];
+				pointList.Remove(currentLine);
+				if (pointList.Count == 0)
+				{
+					controlLineDict.Remove(prevEnd);
+				}
+				currentLine.moveMiddle(new ControlPoint(mouseUpPos));
+				if (controlLineDict.ContainsKey(currentLine.Start))
+				{
+					controlLineDict[currentLine.Start].Add(currentLine);
+				}
+				else
+				{
+					List<ControlLine> startList = new List<ControlLine>();
+					startList.Add(currentLine);
+					controlLineDict.Add(currentLine.Start, startList);
+				}
+				if (controlLineDict.ContainsKey(currentLine.Middle))
+				{
+					controlLineDict[currentLine.Middle].Add(currentLine);
+				}
+				else
+				{
+					List<ControlLine> startList = new List<ControlLine>();
+					startList.Add(currentLine);
+					controlLineDict.Add(currentLine.Middle, startList);
+				}
+				if (controlLineDict.ContainsKey(currentLine.End))
+				{
+					controlLineDict[currentLine.End].Add(currentLine);
+				}
+				else
+				{
+					List<ControlLine> startList = new List<ControlLine>();
+					startList.Add(currentLine);
+					controlLineDict.Add(currentLine.End, startList);
+				}
+				editingMiddle = false;
 			}
 		}
 

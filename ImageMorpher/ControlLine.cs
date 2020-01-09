@@ -108,5 +108,26 @@ namespace ImageMorpher
 			Canvas.SetLeft(drawnMiddle, middle.point.X - 2.5);
 			Canvas.SetTop(drawnMiddle, middle.point.Y - 2.5);
 		}
+
+		public void moveMiddle(ControlPoint o)
+		{
+			double xtranslation = o.point.X - middle.point.X;
+			double ytranslation = o.point.Y - middle.point.Y;
+			middle = o;
+			Point startPoint = new Point(start.point.X + xtranslation, start.point.Y + ytranslation);
+			start = new ControlPoint(startPoint);
+			Point endPoint = new Point(end.point.X + xtranslation, end.point.Y + ytranslation);
+			end = new ControlPoint(endPoint);
+			drawnLine.X1 = start.point.X;
+			drawnLine.Y1 = start.point.Y;
+			Canvas.SetLeft(drawnStart, start.point.X - 2.5);
+			Canvas.SetTop(drawnStart, start.point.Y - 2.5);
+			drawnLine.X2 = end.point.X;
+			drawnLine.Y2 = end.point.Y;
+			Canvas.SetLeft(drawnEnd, end.point.X - 2.5);
+			Canvas.SetTop(drawnEnd, end.point.Y - 2.5);
+			Canvas.SetLeft(drawnMiddle, middle.point.X - 2.5);
+			Canvas.SetTop(drawnMiddle, middle.point.Y - 2.5);
+		}
 	}
 }
