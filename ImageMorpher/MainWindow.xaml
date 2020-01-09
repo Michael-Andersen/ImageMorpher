@@ -1,0 +1,40 @@
+﻿<Window x:Class="ImageMorpher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageMorpher"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="10*" ></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*" />
+            <ColumnDefinition Width="1" />
+            <ColumnDefinition Width="10*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.RowSpan="1" Grid.Row="0" Grid.ColumnSpan="3">
+            <Menu Background="#eee">
+                <MenuItem Header="File">
+                    <MenuItem Header="Set Source Image" 
+            Click="SetSrc_Click"/>
+                    <MenuItem Header="Set Destination Image" 
+            Click="SetDest_Click"/>
+                    <MenuItem Header="Create Morph" 
+            Click="Morph_Click"/>
+                </MenuItem>
+            </Menu></Grid>
+        <Grid x:Name="morphGrid" Grid.ColumnSpan="3" Grid.RowSpan="1" Grid.Row="1">
+            <local:MorphViewer x:Name="morphViewer"></local:MorphViewer>
+        </Grid>
+        <Grid x:Name="srcGrid" Grid.ColumnSpan="1" Grid.Column="0" Grid.RowSpan="1" Grid.Row="1">
+            <local:ImageViewer x:Name="srcViewer"></local:ImageViewer>
+        </Grid>
+        <Grid x:Name="destGrid" Grid.ColumnSpan="1" Grid.Column="2" Grid.RowSpan="1" Grid.Row="1">
+            <local:ImageViewer x:Name="destViewer"></local:ImageViewer>
+    </Grid>
+    </Grid>
+</Window>
