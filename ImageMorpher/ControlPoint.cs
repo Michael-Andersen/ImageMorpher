@@ -10,15 +10,17 @@ namespace ImageMorpher
 	[Serializable]
 	public class ControlPoint : IComparable
 	{
-		public Point point;
+		private Point point;
 		private static double tolerance = 4;
 
 		public ControlPoint(Point o)
 		{
 			point = o;
 		}
-	
-		
+
+		public Point Point { get => point; set => point = value; }
+
+
 		public int CompareTo(object obj)
 		{
 			ControlPoint p = (ControlPoint)obj;

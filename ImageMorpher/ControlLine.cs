@@ -63,8 +63,8 @@ namespace ImageMorpher
 			drawnLine.Fill = Brushes.Black;
 			drawnLine.Stroke = Brushes.Black;
 			drawnLine.StrokeThickness = 1;
-			drawnLine.X1 = start.point.X;
-			drawnLine.Y1 = start.point.Y;
+			drawnLine.X1 = start.Point.X;
+			drawnLine.Y1 = start.Point.Y;
 			drawnStart = new Ellipse();
 			drawnEnd = new Ellipse();
 			drawnMiddle = new Ellipse();
@@ -77,14 +77,14 @@ namespace ImageMorpher
 			drawnMiddle.Width = 5;
 			drawnMiddle.Height = 5;
 			drawnMiddle.Fill = Brushes.Blue;
-			Canvas.SetLeft(drawnStart, start.point.X - 2.5);
-			Canvas.SetTop(drawnStart, start.point.Y - 2.5);
-			drawnLine.X2 = end.point.X;
-			drawnLine.Y2 = end.point.Y;
-			Canvas.SetLeft(drawnEnd, end.point.X - 2.5);
-			Canvas.SetTop(drawnEnd, end.point.Y - 2.5);
-			Canvas.SetLeft(drawnMiddle, middle.point.X - 2.5);
-			Canvas.SetTop(drawnMiddle, middle.point.Y - 2.5);
+			Canvas.SetLeft(drawnStart, start.Point.X - 2.5);
+			Canvas.SetTop(drawnStart, start.Point.Y - 2.5);
+			drawnLine.X2 = end.Point.X;
+			drawnLine.Y2 = end.Point.Y;
+			Canvas.SetLeft(drawnEnd, end.Point.X - 2.5);
+			Canvas.SetTop(drawnEnd, end.Point.Y - 2.5);
+			Canvas.SetLeft(drawnMiddle, middle.Point.X - 2.5);
+			Canvas.SetTop(drawnMiddle, middle.Point.Y - 2.5);
 			canvas.Children.Add(drawnLine);
 			canvas.Children.Add(drawnStart);
 			canvas.Children.Add(drawnEnd);
@@ -122,10 +122,10 @@ namespace ImageMorpher
 		public void setStart(ControlPoint o)
 		{
 			start = o;
-			drawnLine.X1 = o.point.X;
-			drawnLine.Y1 = o.point.Y;
-			Canvas.SetLeft(drawnStart, o.point.X - 2.5);
-			Canvas.SetTop(drawnStart, o.point.Y - 2.5);
+			drawnLine.X1 = o.Point.X;
+			drawnLine.Y1 = o.Point.Y;
+			Canvas.SetLeft(drawnStart, o.Point.X - 2.5);
+			Canvas.SetTop(drawnStart, o.Point.Y - 2.5);
 		}
 
 		public void setEnd(ControlPoint o)
@@ -134,11 +134,11 @@ namespace ImageMorpher
 			drawnEnd.Width = 5;
 			drawnEnd.Height = 5;
 			drawnEnd.Fill = Brushes.Red;
-			Canvas.SetLeft(drawnEnd, o.point.X - 2.5);
-			Canvas.SetTop(drawnEnd, o.point.Y - 2.5);
+			Canvas.SetLeft(drawnEnd, o.Point.X - 2.5);
+			Canvas.SetTop(drawnEnd, o.Point.Y - 2.5);
 			setMiddle();
-			drawnLine.X2 = o.point.X;
-			drawnLine.Y2 = o.point.Y;
+			drawnLine.X2 = o.Point.X;
+			drawnLine.Y2 = o.Point.Y;
 		}
 
 		public void setMiddle()
@@ -147,32 +147,32 @@ namespace ImageMorpher
 			drawnMiddle.Height = 5;
 			drawnMiddle.Fill = Brushes.Blue;
 			Point middlePoint = new Point();
-			middlePoint.X = (start.point.X + end.point.X) / 2;
-			middlePoint.Y = (start.point.Y + end.point.Y) / 2;
+			middlePoint.X = (start.Point.X + end.Point.X) / 2;
+			middlePoint.Y = (start.Point.Y + end.Point.Y) / 2;
 			middle = new ControlPoint(middlePoint);
-			Canvas.SetLeft(drawnMiddle, middle.point.X - 2.5);
-			Canvas.SetTop(drawnMiddle, middle.point.Y - 2.5);
+			Canvas.SetLeft(drawnMiddle, middle.Point.X - 2.5);
+			Canvas.SetTop(drawnMiddle, middle.Point.Y - 2.5);
 		}
 
 		public void moveMiddle(ControlPoint o)
 		{
-			double xtranslation = o.point.X - middle.point.X;
-			double ytranslation = o.point.Y - middle.point.Y;
+			double xtranslation = o.Point.X - middle.Point.X;
+			double ytranslation = o.Point.Y - middle.Point.Y;
 			middle = o;
-			Point startPoint = new Point(start.point.X + xtranslation, start.point.Y + ytranslation);
+			Point startPoint = new Point(start.Point.X + xtranslation, start.Point.Y + ytranslation);
 			start = new ControlPoint(startPoint);
-			Point endPoint = new Point(end.point.X + xtranslation, end.point.Y + ytranslation);
+			Point endPoint = new Point(end.Point.X + xtranslation, end.Point.Y + ytranslation);
 			end = new ControlPoint(endPoint);
-			drawnLine.X1 = start.point.X;
-			drawnLine.Y1 = start.point.Y;
-			Canvas.SetLeft(drawnStart, start.point.X - 2.5);
-			Canvas.SetTop(drawnStart, start.point.Y - 2.5);
-			drawnLine.X2 = end.point.X;
-			drawnLine.Y2 = end.point.Y;
-			Canvas.SetLeft(drawnEnd, end.point.X - 2.5);
-			Canvas.SetTop(drawnEnd, end.point.Y - 2.5);
-			Canvas.SetLeft(drawnMiddle, middle.point.X - 2.5);
-			Canvas.SetTop(drawnMiddle, middle.point.Y - 2.5);
+			drawnLine.X1 = start.Point.X;
+			drawnLine.Y1 = start.Point.Y;
+			Canvas.SetLeft(drawnStart, start.Point.X - 2.5);
+			Canvas.SetTop(drawnStart, start.Point.Y - 2.5);
+			drawnLine.X2 = end.Point.X;
+			drawnLine.Y2 = end.Point.Y;
+			Canvas.SetLeft(drawnEnd, end.Point.X - 2.5);
+			Canvas.SetTop(drawnEnd, end.Point.Y - 2.5);
+			Canvas.SetLeft(drawnMiddle, middle.Point.X - 2.5);
+			Canvas.SetTop(drawnMiddle, middle.Point.Y - 2.5);
 		}
 	}
 }
