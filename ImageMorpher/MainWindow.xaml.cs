@@ -81,7 +81,20 @@ namespace ImageMorpher
 			destViewer.Visibility = Visibility.Hidden;
 			morphViewer.Visibility = Visibility.Visible;
 			morphViewer.setImageSrc(srcViewer.getImage().Source);
+			modeItem.Header = "Change Control Lines";
+			modeItem.Click -= Morph_Click;
+			modeItem.Click += ChangeControlLines_Click;
 			UpdateLayout();
+		}
+
+		private void ChangeControlLines_Click(object sender, RoutedEventArgs e)
+		{
+			srcViewer.Visibility = Visibility.Visible;
+			destViewer.Visibility = Visibility.Visible;
+			morphViewer.Visibility = Visibility.Hidden;
+			modeItem.Header = "Create Morph";
+			modeItem.Click += Morph_Click;
+			modeItem.Click -= ChangeControlLines_Click;
 		}
 	}
 }

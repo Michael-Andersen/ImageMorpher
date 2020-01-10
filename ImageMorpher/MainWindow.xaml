@@ -27,7 +27,7 @@
             Click="SetSrc_Click"/>
                     <MenuItem Header="Set Destination Image" 
             Click="SetDest_Click"/>
-                    <MenuItem Header="Create Morph" 
+                    <MenuItem x:Name="modeItem" Header="Create Morph" 
             Click="Morph_Click"/>
                 </MenuItem>
             </Menu></Grid>

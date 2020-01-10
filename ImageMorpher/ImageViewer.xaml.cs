@@ -152,6 +152,7 @@ namespace ImageMorpher
 
 		private void mouseDown_Edit(ControlPoint downControlPoint)
 		{
+			grid.Cursor = Cursors.Arrow;
 			selected = true;
 			otherViewer.Selected = true;
 			ControlLine cl = controlLineDict[downControlPoint][0];
@@ -210,6 +211,16 @@ namespace ImageMorpher
 					break;
 				case EditState.End:
 					currentLine.setEnd(new ControlPoint(mousePos));
+					break;
+				case EditState.None:
+					ControlPoint downControlPoint = new ControlPoint(mousePos);
+					if (controlLineDict.ContainsKey(downControlPoint))
+					{
+						grid.Cursor = Cursors.Hand;
+					} else
+					{
+						grid.Cursor = Cursors.Arrow;
+					}
 					break;
 				default:
 					break;

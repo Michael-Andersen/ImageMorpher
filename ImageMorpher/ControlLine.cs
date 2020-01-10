@@ -26,88 +26,83 @@ namespace ImageMorpher
 		private ControlPoint end;
 		private ControlPoint middle;
 
+		private static double DIAMETER = 5;
+		private static double LINE_THICKNESS = 1;
+		private static SolidColorBrush START_BRUSH = Brushes.Green;
+		private static SolidColorBrush MIDDLE_BRUSH = Brushes.Blue;
+		private static SolidColorBrush END_BRUSH = Brushes.Red;
+		private static SolidColorBrush HIGHLIGHT_BRUSH = Brushes.Purple;
+		private static SolidColorBrush LINE_BRUSH = Brushes.Black;
+
 		public ControlPoint Start { get => start; set => start = value; }
 		public ControlPoint End { get => end; set => end = value; }
 		public ControlPoint Middle { get => middle; set => middle = value; }
 
 		public ControlLine(Canvas canvas, ControlPoint o)
-		{	
-			drawnLine = new Line();
-			drawnStart = new Ellipse();
-			drawnEnd = new Ellipse();
-			drawnMiddle = new Ellipse();
-			drawnStart.Width = 5;
-			drawnStart.Height = 5;
-			drawnStart.Fill = Brushes.Green;
+		{
+			initVisuals();
+			setThickness();
+			setColours();
+			addToCanvas(canvas);
 			setStart(o);
 			setEnd(o);
-			drawnLine.Fill = Brushes.Black;
-			drawnLine.Stroke = Brushes.Black;
-			drawnLine.StrokeThickness = 1;
-			drawnEnd.Width = 5;
-			drawnEnd.Height = 5;
-			drawnEnd.Fill = Brushes.Red;
-			drawnMiddle.Width = 5;
-			drawnMiddle.Height = 5;
-			drawnMiddle.Fill = Brushes.Blue;
+		}
+
+		private void addToCanvas(Canvas canvas)
+		{
 			canvas.Children.Add(drawnLine);
 			canvas.Children.Add(drawnStart);
 			canvas.Children.Add(drawnEnd);
 			canvas.Children.Add(drawnMiddle);
-
+		}
+		private void setColours()
+		{
+			drawnStart.Fill = START_BRUSH;
+			drawnLine.Fill = LINE_BRUSH;
+			drawnLine.Stroke = LINE_BRUSH;
+			drawnEnd.Fill = END_BRUSH;
+			drawnMiddle.Fill = MIDDLE_BRUSH;
 		}
 
-		public void drawLine(Canvas canvas)
+		private void setThickness()
+		{
+			drawnStart.Width = DIAMETER;
+			drawnStart.Height = DIAMETER;
+			drawnLine.StrokeThickness = LINE_THICKNESS;
+			drawnEnd.Width = DIAMETER;
+			drawnEnd.Height = DIAMETER;
+			drawnMiddle.Width = DIAMETER;
+			drawnMiddle.Height = DIAMETER;
+		}
+		private void initVisuals()
 		{
 			drawnLine = new Line();
-			drawnLine.Fill = Brushes.Black;
-			drawnLine.Stroke = Brushes.Black;
-			drawnLine.StrokeThickness = 1;
-			drawnLine.X1 = start.Point.X;
-			drawnLine.Y1 = start.Point.Y;
 			drawnStart = new Ellipse();
 			drawnEnd = new Ellipse();
 			drawnMiddle = new Ellipse();
-			drawnStart.Width = 5;
-			drawnStart.Height = 5;
-			drawnStart.Fill = Brushes.Green;
-			drawnEnd.Width = 5;
-			drawnEnd.Height = 5;
-			drawnEnd.Fill = Brushes.Red;
-			drawnMiddle.Width = 5;
-			drawnMiddle.Height = 5;
-			drawnMiddle.Fill = Brushes.Blue;
-			Canvas.SetLeft(drawnStart, start.Point.X - 2.5);
-			Canvas.SetTop(drawnStart, start.Point.Y - 2.5);
-			drawnLine.X2 = end.Point.X;
-			drawnLine.Y2 = end.Point.Y;
-			Canvas.SetLeft(drawnEnd, end.Point.X - 2.5);
-			Canvas.SetTop(drawnEnd, end.Point.Y - 2.5);
-			Canvas.SetLeft(drawnMiddle, middle.Point.X - 2.5);
-			Canvas.SetTop(drawnMiddle, middle.Point.Y - 2.5);
-			canvas.Children.Add(drawnLine);
-			canvas.Children.Add(drawnStart);
-			canvas.Children.Add(drawnEnd);
-			canvas.Children.Add(drawnMiddle);
+		}
+		public void drawLine(Canvas canvas)
+		{
+			initVisuals();
+			setThickness();
+			setColours();
+			addToCanvas(canvas);
+			setStart(start);
+			setEnd(end);
 		}
 
 		public void highlight()
 		{
-			drawnLine.Fill = Brushes.Purple;
-			drawnLine.Stroke = Brushes.Purple;
-			drawnMiddle.Fill = Brushes.Purple;
+			drawnLine.Fill = HIGHLIGHT_BRUSH;
+			drawnLine.Stroke = HIGHLIGHT_BRUSH;
+			drawnMiddle.Fill = HIGHLIGHT_BRUSH;
 		}
 
 		public void deHighlight()
 		{
-			drawnLine.Fill = Brushes.Black;
-			drawnLine.Stroke = Brushes.Black;
-			drawnMiddle.Fill = Brushes.Blue;
-		}
-		
-		public void addToCanvas(Canvas canvas)
-		{
-			canvas.Children.Add(drawnLine);
+			drawnLine.Fill = LINE_BRUSH;
+			drawnLine.Stroke = LINE_BRUSH;
+			drawnMiddle.Fill = MIDDLE_BRUSH;
 		}
 
 		public void removeFromCanvas(Canvas canvas)
@@ -128,28 +123,25 @@ namespace ImageMorpher
 			Canvas.SetTop(drawnStart, o.Point.Y - 2.5);
 		}
 
-		public void setEnd(ControlPoint o)
+		public void setEnd(ControlPoint o, bool newMiddle=true)
 		{
 			end = o;
-			drawnEnd.Width = 5;
-			drawnEnd.Height = 5;
-			drawnEnd.Fill = Brushes.Red;
 			Canvas.SetLeft(drawnEnd, o.Point.X - 2.5);
 			Canvas.SetTop(drawnEnd, o.Point.Y - 2.5);
-			setMiddle();
+			setMiddle(newMiddle);
 			drawnLine.X2 = o.Point.X;
 			drawnLine.Y2 = o.Point.Y;
 		}
 
-		public void setMiddle()
+		public void setMiddle(bool newMiddle=true)
 		{
-			drawnMiddle.Width = 5;
-			drawnMiddle.Height = 5;
-			drawnMiddle.Fill = Brushes.Blue;
-			Point middlePoint = new Point();
-			middlePoint.X = (start.Point.X + end.Point.X) / 2;
-			middlePoint.Y = (start.Point.Y + end.Point.Y) / 2;
-			middle = new ControlPoint(middlePoint);
+			if (newMiddle)
+			{
+				Point middlePoint = new Point();
+				middlePoint.X = (start.Point.X + end.Point.X) / 2;
+				middlePoint.Y = (start.Point.Y + end.Point.Y) / 2;
+				middle = new ControlPoint(middlePoint);
+			}
 			Canvas.SetLeft(drawnMiddle, middle.Point.X - 2.5);
 			Canvas.SetTop(drawnMiddle, middle.Point.Y - 2.5);
 		}
@@ -160,19 +152,9 @@ namespace ImageMorpher
 			double ytranslation = o.Point.Y - middle.Point.Y;
 			middle = o;
 			Point startPoint = new Point(start.Point.X + xtranslation, start.Point.Y + ytranslation);
-			start = new ControlPoint(startPoint);
+			setStart(new ControlPoint(startPoint));
 			Point endPoint = new Point(end.Point.X + xtranslation, end.Point.Y + ytranslation);
-			end = new ControlPoint(endPoint);
-			drawnLine.X1 = start.Point.X;
-			drawnLine.Y1 = start.Point.Y;
-			Canvas.SetLeft(drawnStart, start.Point.X - 2.5);
-			Canvas.SetTop(drawnStart, start.Point.Y - 2.5);
-			drawnLine.X2 = end.Point.X;
-			drawnLine.Y2 = end.Point.Y;
-			Canvas.SetLeft(drawnEnd, end.Point.X - 2.5);
-			Canvas.SetTop(drawnEnd, end.Point.Y - 2.5);
-			Canvas.SetLeft(drawnMiddle, middle.Point.X - 2.5);
-			Canvas.SetTop(drawnMiddle, middle.Point.Y - 2.5);
+			setEnd(new ControlPoint(endPoint), false);
 		}
 	}
 }
