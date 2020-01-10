@@ -11,12 +11,16 @@ using System.Windows.Shapes;
 namespace ImageMorpher
 {
 	
-
-    class ControlLine
+	[Serializable]
+    public class ControlLine
 	{
+		[NonSerialized]
 		private Line drawnLine;
+		[NonSerialized]
 		private Ellipse drawnStart;
+		[NonSerialized]
 		private Ellipse drawnEnd;
+		[NonSerialized]
 		private Ellipse drawnMiddle;
 		private ControlPoint start;
 		private ControlPoint end;
@@ -40,6 +44,47 @@ namespace ImageMorpher
 			drawnLine.Fill = Brushes.Black;
 			drawnLine.Stroke = Brushes.Black;
 			drawnLine.StrokeThickness = 1;
+			drawnEnd.Width = 5;
+			drawnEnd.Height = 5;
+			drawnEnd.Fill = Brushes.Red;
+			drawnMiddle.Width = 5;
+			drawnMiddle.Height = 5;
+			drawnMiddle.Fill = Brushes.Blue;
+			canvas.Children.Add(drawnLine);
+			canvas.Children.Add(drawnStart);
+			canvas.Children.Add(drawnEnd);
+			canvas.Children.Add(drawnMiddle);
+
+		}
+
+		public void drawLine(Canvas canvas)
+		{
+			drawnLine = new Line();
+			drawnLine.Fill = Brushes.Black;
+			drawnLine.Stroke = Brushes.Black;
+			drawnLine.StrokeThickness = 1;
+			drawnLine.X1 = start.point.X;
+			drawnLine.Y1 = start.point.Y;
+			drawnStart = new Ellipse();
+			drawnEnd = new Ellipse();
+			drawnMiddle = new Ellipse();
+			drawnStart.Width = 5;
+			drawnStart.Height = 5;
+			drawnStart.Fill = Brushes.Green;
+			drawnEnd.Width = 5;
+			drawnEnd.Height = 5;
+			drawnEnd.Fill = Brushes.Red;
+			drawnMiddle.Width = 5;
+			drawnMiddle.Height = 5;
+			drawnMiddle.Fill = Brushes.Blue;
+			Canvas.SetLeft(drawnStart, start.point.X - 2.5);
+			Canvas.SetTop(drawnStart, start.point.Y - 2.5);
+			drawnLine.X2 = end.point.X;
+			drawnLine.Y2 = end.point.Y;
+			Canvas.SetLeft(drawnEnd, end.point.X - 2.5);
+			Canvas.SetTop(drawnEnd, end.point.Y - 2.5);
+			Canvas.SetLeft(drawnMiddle, middle.point.X - 2.5);
+			Canvas.SetTop(drawnMiddle, middle.point.Y - 2.5);
 			canvas.Children.Add(drawnLine);
 			canvas.Children.Add(drawnStart);
 			canvas.Children.Add(drawnEnd);

@@ -86,6 +86,7 @@
     <Compile Include="MorphViewer.xaml.cs">
       <DependentUpon>MorphViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProjectPersistence.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -25,19 +25,43 @@ namespace ImageMorpher
 		bool editingStart = false;
 		bool editingEnd = false;
 		bool editingMiddle = false;
+		bool selected = false;
+		String imgFileName;
 		int editIndex = 0;
 		Point mouseDownPos;
 		ControlPoint prevEnd;
 		ControlPoint prevMid;
 		ControlPoint prevStart;
-		List<ControlLine> controlLines;
+		private List<ControlLine> controlLines;
 		SortedDictionary<ControlPoint, List<ControlLine>> controlLineDict;
 		ControlLine currentLine;
 		ImageViewer otherViewer;
 
 		public int EditIndex{ get => editIndex; set => editIndex = value; }
+		public bool Selected { get => selected; set => selected = value; }
+		public List<ControlLine> ControlLines
+		{
+			get => controlLines;
+			set => controlLines = value;
+		}
+		public SortedDictionary<ControlPoint, List<ControlLine>> ControlLineDict
+		{
+			get => controlLineDict;
+			set => controlLineDict = value;
+		}
+		public ImageSource ImageSrc
+		{
+			get => image.Source;
+			set => image.Source = value;
+		}
 
-		public Image getImage()
+		public String ImgFileName 
+		{
+			get => imgFileName;
+			set => imgFileName = value;
+		}
+
+	public Image getImage()
 		{
 			return image;
 		}
@@ -61,30 +85,52 @@ namespace ImageMorpher
 			{
 				ImageSource imageSource = new BitmapImage(new Uri(openFileDialog.FileName));
 				image.Source = imageSource;
+				imgFileName = openFileDialog.FileName;
 			}
 
 		//	canvas.Height = image.ActualHeight;
 		//	canvas.Width = image.ActualWidth;
 		}
 
+		public void loadProject(List<ControlLine> lines, 
+			SortedDictionary<ControlPoint, List<ControlLine>> dict, String filename )
+		{
+			canvas.Children.Clear();
+			controlLines = lines;
+			controlLineDict = dict;
+			imgFileName = filename;
+			ImageSource imageSource = new BitmapImage(new Uri(filename));
+			image.Source = imageSource;
+			foreach (ControlLine cl in controlLines)
+			{
+				cl.drawLine(canvas);
+			}
+		}
+
 		private void mouseDown(object sender, MouseButtonEventArgs e)
 		{
+			if (image.Source == null)
+			{
+				return;
+			}
 			if (e.ChangedButton == MouseButton.Right)
 			{
 				return;
 			}
-			if (controlLines.Count > 0)
+			if (selected)
 			{
 				deHighlightLine(editIndex);
 				otherViewer.deHighlightLine(editIndex);
+				selected = false;
+				otherViewer.Selected = false;
 			}
 			mouseDownPos = e.GetPosition(grid);
 			ControlPoint downControlPoint = new ControlPoint(mouseDownPos);
 			if (controlLineDict.ContainsKey(downControlPoint))
 			{
+				selected = true;
+				otherViewer.Selected = true;
 				ControlLine cl = controlLineDict[downControlPoint][0];
-				deHighlightLine(editIndex);
-				otherViewer.deHighlightLine(editIndex);
 				editIndex = controlLines.IndexOf(cl);
 				otherViewer.EditIndex = editIndex;
 				otherViewer.highlightLine(editIndex);
@@ -341,8 +387,17 @@ namespace ImageMorpher
 		}
 		private void removeLine(object sender, RoutedEventArgs e)
 		{
-			destroySelectedLine();
-			otherViewer.destroySelectedLine();
+			if (selected)
+			{
+				destroySelectedLine();
+				otherViewer.destroySelectedLine();
+			}
+		}
+
+		private void removeAllLines(object sender, RoutedEventArgs e)
+		{
+			destroyAllLines();
+			otherViewer.destroyAllLines();
 		}
 
 		public void destroySelectedLine()
@@ -367,6 +422,15 @@ namespace ImageMorpher
 				controlLineDict.Remove(currentLine.End);
 			}
 			currentLine.removeFromCanvas(canvas);
+			controlLines.Remove(currentLine);
+			selected = false;
+		}
+
+		public void destroyAllLines()
+		{
+			controlLineDict.Clear();
+			controlLines.Clear();
+			canvas.Children.Clear();
 		}
 
 	}

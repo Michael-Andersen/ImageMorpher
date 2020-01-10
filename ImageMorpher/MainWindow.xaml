@@ -19,6 +19,10 @@
         <Grid Grid.RowSpan="1" Grid.Row="0" Grid.ColumnSpan="3">
             <Menu Background="#eee">
                 <MenuItem Header="File">
+                    <MenuItem Header="Open Project" 
+            Click="OpenProject_Click"/>
+                    <MenuItem Header="Save Project" 
+            Click="SaveProject_Click"/>
                     <MenuItem Header="Set Source Image" 
             Click="SetSrc_Click"/>
                     <MenuItem Header="Set Destination Image" 

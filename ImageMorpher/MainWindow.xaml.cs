@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,6 +39,40 @@ namespace ImageMorpher
 		private void SetDest_Click(object sender, RoutedEventArgs e)
 		{
 			destViewer.setImage();
+		}
+
+		private void SaveProject_Click(object sender, RoutedEventArgs e)
+		{
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			if (saveFileDialog.ShowDialog() == true)
+			{
+				Stream SaveFileStream = File.Create(saveFileDialog.FileName);
+				BinaryFormatter serializer = new BinaryFormatter();
+				ProjectPersistence save = new ProjectPersistence();
+				save.DestControlDict = destViewer.ControlLineDict;
+				save.DestControlLines = destViewer.ControlLines;
+				save.DestImageFilename = destViewer.ImgFileName;
+				save.SrcControlDict = srcViewer.ControlLineDict;
+				save.SrcControlLines = srcViewer.ControlLines;
+				save.SrcImageFilename = srcViewer.ImgFileName;
+				serializer.Serialize(SaveFileStream, save);
+				SaveFileStream.Close();
+			}
+		}
+
+		private void OpenProject_Click(object sender, RoutedEventArgs e)
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			if (openFileDialog.ShowDialog() == true)
+			{
+				Stream openFileStream = File.OpenRead(openFileDialog.FileName);
+				BinaryFormatter deserializer = new BinaryFormatter();
+				ProjectPersistence loaded = (ProjectPersistence)deserializer.Deserialize(openFileStream);
+				srcViewer.loadProject(loaded.SrcControlLines, loaded.SrcControlDict, loaded.SrcImageFilename);
+				destViewer.loadProject(loaded.DestControlLines, loaded.DestControlDict, 
+					loaded.DestImageFilename);
+				openFileStream.Close();
+			}
 		}
 
 		private void Morph_Click(object sender, RoutedEventArgs e)

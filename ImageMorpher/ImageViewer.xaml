@@ -12,6 +12,7 @@
         <Grid.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="Remove Selected Line" Click="removeLine"/>
+                <MenuItem Header="Remove All Lines" Click="removeAllLines"/>
             </ContextMenu>
         </Grid.ContextMenu>
         <Image x:Name="image"></Image>

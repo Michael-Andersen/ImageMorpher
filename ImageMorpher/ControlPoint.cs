@@ -7,7 +7,8 @@ using System.Windows;
 
 namespace ImageMorpher
 {
-	class ControlPoint : IComparable
+	[Serializable]
+	public class ControlPoint : IComparable
 	{
 		public Point point;
 		private static double tolerance = 4;
