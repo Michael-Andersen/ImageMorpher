@@ -23,11 +23,14 @@ namespace ImageMorpher
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private SettingsWindow settings;
+
 		public MainWindow()
 		{
 			InitializeComponent();
 			destViewer.setOtherViewer(srcViewer);
 			srcViewer.setOtherViewer(destViewer);
+			settings = new SettingsWindow(srcViewer, destViewer);
 			morphViewer.Visibility = Visibility.Collapsed;
 		}
 
@@ -55,6 +58,14 @@ namespace ImageMorpher
 				save.SrcControlDict = srcViewer.ControlLineDict;
 				save.SrcControlLines = srcViewer.ControlLines;
 				save.SrcImageFilename = srcViewer.ImgFileName;
+				save.StartColour = ControlLine.START_COLOUR;
+				save.MiddleColour = ControlLine.MIDDLE_COLOUR;
+				save.EndColour = ControlLine.END_COLOUR;
+				save.LineColour = ControlLine.LINE_COLOUR;
+				save.HighlightColour = ControlLine.HIGHLIGHT_COLOUR;
+				save.LineThickness = ControlLine.LINE_THICKNESS;
+				save.Diameter = ControlLine.DIAMETER;
+				save.Tolerance = ControlPoint.TOLERANCE;
 				serializer.Serialize(SaveFileStream, save);
 				SaveFileStream.Close();
 			}
@@ -67,12 +78,21 @@ namespace ImageMorpher
 			{
 				Stream openFileStream = File.OpenRead(openFileDialog.FileName);
 				BinaryFormatter deserializer = new BinaryFormatter();
+				//must be temporarily set to 0 to ensure it's lower than saved tolerance due sorted dictionary
+				ControlPoint.TOLERANCE = 0; 
 				ProjectPersistence loaded = (ProjectPersistence)deserializer.Deserialize(openFileStream);
+				loadSettings(loaded);
 				srcViewer.loadProject(loaded.SrcControlLines, loaded.SrcControlDict, loaded.SrcImageFilename);
 				destViewer.loadProject(loaded.DestControlLines, loaded.DestControlDict, 
 					loaded.DestImageFilename);
 				openFileStream.Close();
 			}
+		}
+
+		private void loadSettings(ProjectPersistence loaded)
+		{
+			settings.load(loaded.LineThickness, loaded.Diameter, loaded.Tolerance, loaded.LineColour,
+				loaded.StartColour, loaded.MiddleColour, loaded.EndColour, loaded.HighlightColour);
 		}
 
 		private void Morph_Click(object sender, RoutedEventArgs e)
@@ -95,6 +115,17 @@ namespace ImageMorpher
 			modeItem.Header = "Create Morph";
 			modeItem.Click += Morph_Click;
 			modeItem.Click -= ChangeControlLines_Click;
+		}
+
+		private void Settings_Click(object sender, RoutedEventArgs e)
+		{
+			settings.Show();
+		}
+
+		private void Main_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			settings.OwnerClosing = true;
+			settings.Close();
 		}
 	}
 }

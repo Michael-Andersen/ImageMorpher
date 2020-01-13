@@ -10,40 +10,21 @@ namespace ImageMorpher
 	[Serializable]
 	public class ProjectPersistence
 	{
-		private List<ControlLine> srcControlLines;
-		private List<ControlLine> destControlLines;
-		private SortedDictionary<ControlPoint, List<ControlLine>> srcControlDict;
-		private SortedDictionary<ControlPoint, List<ControlLine>> destControlDict;
-		private String srcImageFilename;
-		private String destImageFilename;
+		public ControlLine.Colour LineColour { get; set; }
+		public ControlLine.Colour StartColour { get; set; }
+		public ControlLine.Colour MiddleColour { get; set; }
+		public ControlLine.Colour EndColour { get; set; }
+		public ControlLine.Colour HighlightColour { get; set; }
+		public double Tolerance { get; set; }
+		public double LineThickness { get; set; }
+		public double Diameter { get; set; }
 
-		public List<ControlLine> SrcControlLines { get => srcControlLines;
-			set => srcControlLines= value; }
-		public List<ControlLine> DestControlLines
-		{
-			get => destControlLines;
-			set => destControlLines = value;
-		}
-		public SortedDictionary<ControlPoint, List<ControlLine>> SrcControlDict
-		{
-			get => srcControlDict;
-			set => srcControlDict = value;
-		}
-		public SortedDictionary<ControlPoint, List<ControlLine>> DestControlDict
-		{
-			get => destControlDict;
-			set => destControlDict = value;
-		}
-		public String SrcImageFilename
-		{
-			get => srcImageFilename;
-			set => srcImageFilename = value;
-		}
-		public String DestImageFilename
-		{
-			get => destImageFilename;
-			set => destImageFilename = value;
-		}
+		public List<ControlLine> SrcControlLines { get; set; }
+		public List<ControlLine> DestControlLines { get; set; }
+		public SortedDictionary<ControlPoint, List<ControlLine>> SrcControlDict { get; set; }
+		public SortedDictionary<ControlPoint, List<ControlLine>> DestControlDict { get; set; }
+		public string SrcImageFilename { get; set; }
+		public string DestImageFilename { get; set; }
 
 	} 
 }

@@ -10,26 +10,25 @@ namespace ImageMorpher
 	[Serializable]
 	public class ControlPoint : IComparable
 	{
-		private Point point;
-		private static double tolerance = 4;
+		public static double TOLERANCE = 4;
 
 		public ControlPoint(Point o)
 		{
-			point = o;
+			Point = o;
 		}
 
-		public Point Point { get => point; set => point = value; }
+		public Point Point { get; set; }
 
 
 		public int CompareTo(object obj)
 		{
 			ControlPoint p = (ControlPoint)obj;
-			if (Math.Abs(p.point.X - this.point.X) < tolerance
-				&& Math.Abs(p.point.Y - this.point.Y) < tolerance)
+			if (Math.Abs(p.Point.X - this.Point.X) < TOLERANCE
+				&& Math.Abs(p.Point.Y - this.Point.Y) < TOLERANCE)
 			{
 				return 0;
 			}
-			if (p.point.X - this.point.X < 0)
+			if (p.Point.X - this.Point.X < 0)
 			{
 				return -1;
 			} else

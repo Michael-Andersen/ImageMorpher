@@ -30,40 +30,23 @@ namespace ImageMorpher
 			None
 		}
 		private EditState editState = EditState.None;
-		private bool selected = false;
-		private String imgFileName;
-		private int editIndex = 0;
 		private ControlPoint prevEnd;
 		private ControlPoint prevMid;
 		private ControlPoint prevStart;
-		private List<ControlLine> controlLines;
-		private SortedDictionary<ControlPoint, List<ControlLine>> controlLineDict;
 		private ControlLine currentLine;
 		private ImageViewer otherViewer;
 
-		public int EditIndex { get => editIndex; set => editIndex = value; }
-		public bool Selected { get => selected; set => selected = value; }
-		public List<ControlLine> ControlLines
-		{
-			get => controlLines;
-			set => controlLines = value;
-		}
-		public SortedDictionary<ControlPoint, List<ControlLine>> ControlLineDict
-		{
-			get => controlLineDict;
-			set => controlLineDict = value;
-		}
+		public int EditIndex { get; set; } = 0;
+		public bool Selected { get; set; } = false;
+		public List<ControlLine> ControlLines { get; set; }
+		public SortedDictionary<ControlPoint, List<ControlLine>> ControlLineDict { get; set; }
 		public ImageSource ImageSrc
 		{
 			get => image.Source;
 			set => image.Source = value;
 		}
 
-		public String ImgFileName
-		{
-			get => imgFileName;
-			set => imgFileName = value;
-		}
+		public string ImgFileName { get; set; }
 
 		public Image getImage()
 		{
@@ -73,8 +56,8 @@ namespace ImageMorpher
 		public ImageViewer()
 		{
 			InitializeComponent();
-			controlLines = new List<ControlLine>();
-			controlLineDict = new SortedDictionary<ControlPoint, List<ControlLine>>();
+			ControlLines = new List<ControlLine>();
+			ControlLineDict = new SortedDictionary<ControlPoint, List<ControlLine>>();
 		}
 
 		public void setOtherViewer(ImageViewer other)
@@ -88,21 +71,97 @@ namespace ImageMorpher
 			if (openFileDialog.ShowDialog() == true)
 			{
 				ImageSource imageSource = new BitmapImage(new Uri(openFileDialog.FileName));
+				string prevFile = ImgFileName;
+				ImageSource prevSrc = image.Source;
 				image.Source = imageSource;
-				imgFileName = openFileDialog.FileName;
+				ImgFileName = openFileDialog.FileName;
+				if (otherViewer.ImageSrc != null && 
+					(((BitmapSource)image.Source).PixelHeight != ((BitmapSource)otherViewer.ImageSrc).PixelHeight
+					|| ((BitmapSource)image.Source).PixelWidth != ((BitmapSource)otherViewer.ImageSrc).PixelWidth))
+				{
+					MessageBoxResult mbr = MessageBox.Show("The image you are adding has different dimensions than the other image." +
+						"Would you like the images to be automatically cropped to the same size? " +
+						"If not, then the other image will be removed.", "", 
+						MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+					if (mbr == MessageBoxResult.Yes)
+					{
+						crop();
+					}
+					else if (mbr == MessageBoxResult.No)
+					{
+						otherViewer.ImageSrc = null;
+						otherViewer.ImgFileName = null;
+					}
+					else
+					{
+						image.Source = prevSrc;
+						ImgFileName = prevFile;
+					}
+				}
 			}
 		}
 
+		private void crop()
+		{
+			if (((BitmapSource)image.Source).PixelHeight > ((BitmapSource)otherViewer.ImageSrc).PixelHeight)
+			{
+				cropHeight();
+			}
+			else if (((BitmapSource)image.Source).PixelHeight < ((BitmapSource)otherViewer.ImageSrc).PixelHeight)
+			{
+				otherViewer.cropHeight();
+			}
+			if (((BitmapSource)image.Source).PixelWidth > ((BitmapSource)otherViewer.ImageSrc).PixelWidth)
+			{
+				cropWidth();
+			}
+			else if (((BitmapSource)image.Source).PixelWidth < ((BitmapSource)otherViewer.ImageSrc).PixelWidth)
+			{
+				otherViewer.cropWidth();
+			}
+		}
+
+		public void cropHeight()
+		{
+			int Ycoord = (int)((((BitmapSource)image.Source).PixelHeight
+				- ((BitmapSource)otherViewer.ImageSrc).PixelHeight) / 2);
+			int height = (int)(((BitmapSource)otherViewer.ImageSrc).PixelHeight);
+			int Xcoord = 0;
+			int width = (int)((BitmapSource)image.Source).PixelWidth;
+			CroppedBitmap cb = new CroppedBitmap(
+							(BitmapSource)image.Source,
+									new Int32Rect(Xcoord, Ycoord, width, height));
+			image.Source = cb;
+		}
+
+		public void cropWidth()
+		{
+			int Ycoord = 0;
+			int height = (int)((BitmapSource)image.Source).PixelHeight;
+			int Xcoord = (int)((((BitmapSource)image.Source).PixelWidth 
+				- ((BitmapSource)otherViewer.ImageSrc).PixelWidth) / 2);
+			int width = (int)(((BitmapSource)otherViewer.ImageSrc).PixelWidth);
+			CroppedBitmap cb = new CroppedBitmap(
+					(BitmapSource)image.Source,
+							new Int32Rect(Xcoord, Ycoord, width, height));
+			image.Source = cb;
+		}
 		public void loadProject(List<ControlLine> lines,
 			SortedDictionary<ControlPoint, List<ControlLine>> dict, String filename)
 		{
 			canvas.Children.Clear();
-			controlLines = lines;
-			controlLineDict = dict;
-			imgFileName = filename;
+			ControlLines = lines;
+			ControlLineDict = dict;
+			ImgFileName = filename;
 			ImageSource imageSource = new BitmapImage(new Uri(filename));
 			image.Source = imageSource;
-			foreach (ControlLine cl in controlLines)
+			if (otherViewer.ImageSrc != null &&
+					(((BitmapSource)image.Source).PixelHeight != ((BitmapSource)otherViewer.ImageSrc).PixelHeight
+					|| ((BitmapSource)image.Source).PixelWidth != ((BitmapSource)otherViewer.ImageSrc).PixelWidth))
+			{
+				crop();
+			}
+			foreach (ControlLine cl in ControlLines)
 			{
 				cl.drawLine(canvas);
 			}
@@ -118,14 +177,14 @@ namespace ImageMorpher
 			{
 				return;
 			}
-			if (selected)
+			if (Selected)
 			{
 				clearSelection();
 			}
 			Point mouseDownPos = e.GetPosition(grid);
 			grid.CaptureMouse();
 			ControlPoint downControlPoint = new ControlPoint(mouseDownPos);
-			if (controlLineDict.ContainsKey(downControlPoint))
+			if (ControlLineDict.ContainsKey(downControlPoint))
 			{
 				mouseDown_Edit(downControlPoint);
 			}
@@ -139,7 +198,7 @@ namespace ImageMorpher
 		{
 			deHighlightLine();
 			otherViewer.deHighlightLine();
-			selected = false;
+			Selected = false;
 			otherViewer.Selected = false;
 		}
 
@@ -153,11 +212,11 @@ namespace ImageMorpher
 		private void mouseDown_Edit(ControlPoint downControlPoint)
 		{
 			grid.Cursor = Cursors.Arrow;
-			selected = true;
+			Selected = true;
 			otherViewer.Selected = true;
-			ControlLine cl = controlLineDict[downControlPoint][0];
-			editIndex = controlLines.IndexOf(cl);
-			otherViewer.EditIndex = editIndex;
+			ControlLine cl = ControlLineDict[downControlPoint][0];
+			EditIndex = ControlLines.IndexOf(cl);
+			otherViewer.EditIndex = EditIndex;
 			otherViewer.highlightLine();
 			highlightLine();
 			currentLine = cl;
@@ -180,12 +239,21 @@ namespace ImageMorpher
 
 		public void highlightLine()
 		{
-			controlLines[editIndex].highlight();
+			ControlLines[EditIndex].highlight();
 		}
 
 		public void deHighlightLine()
 		{
-			controlLines[editIndex].deHighlight();
+			ControlLines[EditIndex].deHighlight();
+		}
+
+		public void updateVisualSettings()
+		{
+			canvas.Children.Clear();
+			foreach (ControlLine cl in ControlLines)
+			{
+				cl.drawLine(canvas);
+			}
 		}
 
 		private void createLineStart(Point mouseDownPos)
@@ -195,6 +263,10 @@ namespace ImageMorpher
 
 		private void mouseMove(object sender, MouseEventArgs e)
 		{
+			if (image.Source == null)
+			{
+				return;
+			}
 			Point mousePos = e.GetPosition(grid);
 			switch (editState)
 			{
@@ -214,7 +286,7 @@ namespace ImageMorpher
 					break;
 				case EditState.None:
 					ControlPoint downControlPoint = new ControlPoint(mousePos);
-					if (controlLineDict.ContainsKey(downControlPoint))
+					if (ControlLineDict.ContainsKey(downControlPoint))
 					{
 						grid.Cursor = Cursors.Hand;
 					} else
@@ -295,7 +367,7 @@ namespace ImageMorpher
 		private void createLineEnd(Point mouseUpPos)
 		{
 			currentLine.setEnd(new ControlPoint(mouseUpPos));
-			controlLines.Add(currentLine);
+			ControlLines.Add(currentLine);
 			addToDict(currentLine.Start);
 			addToDict(currentLine.End);
 			addToDict(currentLine.Middle);
@@ -303,7 +375,7 @@ namespace ImageMorpher
 
 		private void removeLine(object sender, RoutedEventArgs e)
 		{
-			if (selected)
+			if (Selected)
 			{
 				destroySelectedLine();
 				otherViewer.destroySelectedLine();
@@ -318,43 +390,43 @@ namespace ImageMorpher
 
 		public void destroySelectedLine()
 		{
-			currentLine = controlLines[editIndex];
+			currentLine = ControlLines[EditIndex];
 			removeFromDict(currentLine.Start);
 			removeFromDict(currentLine.Middle);
 			removeFromDict(currentLine.End);
 			currentLine.removeFromCanvas(canvas);
-			controlLines.Remove(currentLine);
-			selected = false;
+			ControlLines.Remove(currentLine);
+			Selected = false;
 		}
 
 		public void destroyAllLines()
 		{
-			controlLineDict.Clear();
-			controlLines.Clear();
+			ControlLineDict.Clear();
+			ControlLines.Clear();
 			canvas.Children.Clear();
 		}
 
 		private void addToDict(ControlPoint cp)
 		{
-			if (controlLineDict.ContainsKey(cp))
+			if (ControlLineDict.ContainsKey(cp))
 			{
-				controlLineDict[cp].Add(currentLine);
+				ControlLineDict[cp].Add(currentLine);
 			}
 			else
 			{
 				List<ControlLine> startList = new List<ControlLine>();
 				startList.Add(currentLine);
-				controlLineDict.Add(cp, startList);
+				ControlLineDict.Add(cp, startList);
 			}
 		}
 
 		private void removeFromDict(ControlPoint cp)
 		{
-			List<ControlLine> pointList = controlLineDict[cp];
+			List<ControlLine> pointList = ControlLineDict[cp];
 			pointList.Remove(currentLine);
 			if (pointList.Count == 0)
 			{
-				controlLineDict.Remove(cp);
+				ControlLineDict.Remove(cp);
 			}
 		}
 	}

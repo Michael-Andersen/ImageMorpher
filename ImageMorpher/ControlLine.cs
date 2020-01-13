@@ -26,17 +26,37 @@ namespace ImageMorpher
 		private ControlPoint end;
 		private ControlPoint middle;
 
-		private static double DIAMETER = 5;
-		private static double LINE_THICKNESS = 1;
-		private static SolidColorBrush START_BRUSH = Brushes.Green;
-		private static SolidColorBrush MIDDLE_BRUSH = Brushes.Blue;
-		private static SolidColorBrush END_BRUSH = Brushes.Red;
-		private static SolidColorBrush HIGHLIGHT_BRUSH = Brushes.Purple;
-		private static SolidColorBrush LINE_BRUSH = Brushes.Black;
+		public enum Colour
+		{
+			Red, Green, Blue, Orange, Black, White, Brown, Purple, Gray
+		}
+
+		public static double DIAMETER = 5;
+		public static double LINE_THICKNESS = 1;
+		public static Colour START_COLOUR = Colour.Green;
+		public static Colour MIDDLE_COLOUR = Colour.Blue;
+		public static Colour END_COLOUR = Colour.Red;
+		public static Colour HIGHLIGHT_COLOUR = Colour.Purple;
+		public static Colour LINE_COLOUR = Colour.Black;
+		private static Dictionary<Colour, SolidColorBrush> colourDict
+			= new Dictionary<Colour, SolidColorBrush>();
 
 		public ControlPoint Start { get => start; set => start = value; }
 		public ControlPoint End { get => end; set => end = value; }
 		public ControlPoint Middle { get => middle; set => middle = value; }
+
+		static ControlLine()
+		{
+			colourDict.Add(Colour.Red, Brushes.Red);
+			colourDict.Add(Colour.Green, Brushes.Green);
+			colourDict.Add(Colour.Gray, Brushes.Gray);
+			colourDict.Add(Colour.Blue, Brushes.Blue);
+			colourDict.Add(Colour.Black, Brushes.Black);
+			colourDict.Add(Colour.Brown, Brushes.Brown);
+			colourDict.Add(Colour.White, Brushes.White);
+			colourDict.Add(Colour.Orange, Brushes.Orange);
+			colourDict.Add(Colour.Purple, Brushes.Purple);
+		}
 
 		public ControlLine(Canvas canvas, ControlPoint o)
 		{
@@ -57,11 +77,11 @@ namespace ImageMorpher
 		}
 		private void setColours()
 		{
-			drawnStart.Fill = START_BRUSH;
-			drawnLine.Fill = LINE_BRUSH;
-			drawnLine.Stroke = LINE_BRUSH;
-			drawnEnd.Fill = END_BRUSH;
-			drawnMiddle.Fill = MIDDLE_BRUSH;
+			drawnStart.Fill = colourDict[START_COLOUR];
+			drawnLine.Fill = colourDict[LINE_COLOUR];
+			drawnLine.Stroke = colourDict[LINE_COLOUR];
+			drawnEnd.Fill = colourDict[END_COLOUR];
+			drawnMiddle.Fill = colourDict[MIDDLE_COLOUR];
 		}
 
 		private void setThickness()
@@ -93,16 +113,16 @@ namespace ImageMorpher
 
 		public void highlight()
 		{
-			drawnLine.Fill = HIGHLIGHT_BRUSH;
-			drawnLine.Stroke = HIGHLIGHT_BRUSH;
-			drawnMiddle.Fill = HIGHLIGHT_BRUSH;
+			drawnLine.Fill = colourDict[HIGHLIGHT_COLOUR];
+			drawnLine.Stroke = colourDict[HIGHLIGHT_COLOUR];
+			drawnMiddle.Fill = colourDict[HIGHLIGHT_COLOUR];
 		}
 
 		public void deHighlight()
 		{
-			drawnLine.Fill = LINE_BRUSH;
-			drawnLine.Stroke = LINE_BRUSH;
-			drawnMiddle.Fill = MIDDLE_BRUSH;
+			drawnLine.Fill = colourDict[LINE_COLOUR];
+			drawnLine.Stroke = colourDict[LINE_COLOUR];
+			drawnMiddle.Fill = colourDict[MIDDLE_COLOUR];
 		}
 
 		public void removeFromCanvas(Canvas canvas)

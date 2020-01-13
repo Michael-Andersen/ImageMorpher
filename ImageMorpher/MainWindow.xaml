@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageMorpher"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="ImageMorpher" Height="450" Width="800"
+        Closing="Main_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -29,6 +30,8 @@
             Click="SetDest_Click"/>
                     <MenuItem x:Name="modeItem" Header="Create Morph" 
             Click="Morph_Click"/>
+                <MenuItem x:Name="settingsItem" Header="Change Settings" 
+            Click="Settings_Click"/>
                 </MenuItem>
             </Menu></Grid>
         <Grid x:Name="morphGrid" Grid.ColumnSpan="3" Grid.RowSpan="1" Grid.Row="1">
