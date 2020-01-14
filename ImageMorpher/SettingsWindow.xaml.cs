@@ -81,7 +81,13 @@ namespace ImageMorpher
 
 		private void FramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-
+			if (srcViewer != null)
+			{
+				//ControlLine test = new ControlLine(srcViewer.canvas, new ControlPoint(new Point(10, 60)));
+				//test.setEnd(new ControlPoint(new Point(40, 10)));
+			//	double dist = ControlLine.distance(test, 60, 40);
+			//	double fl = ControlLine.fracLength(test, 60, 40);
+			}
 		}
 
 		private void LineColour_SelectionChanged(object sender, SelectionChangedEventArgs e)

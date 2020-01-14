@@ -30,6 +30,8 @@ namespace ImageMorpher
 			InitializeComponent();
 			destViewer.setOtherViewer(srcViewer);
 			srcViewer.setOtherViewer(destViewer);
+			srcViewer.IsSrc = true;
+			destViewer.IsSrc = false;
 			settings = new SettingsWindow(srcViewer, destViewer);
 			morphViewer.Visibility = Visibility.Collapsed;
 		}
@@ -97,10 +99,16 @@ namespace ImageMorpher
 
 		private void Morph_Click(object sender, RoutedEventArgs e)
 		{
+			Morpher morph = new Morpher();
+			morph.SrcLines = srcViewer.ControlLines;
+			morph.DestLines = destViewer.ControlLines;
+			morph.setSrc((BitmapSource)srcViewer.ImageSrc);
+			morph.setDest((BitmapSource)destViewer.ImageSrc);
+			ImageSource img = morph.getFrame((BitmapSource)srcViewer.ImageSrc);
 			srcViewer.Visibility = Visibility.Hidden;
 			destViewer.Visibility = Visibility.Hidden;
 			morphViewer.Visibility = Visibility.Visible;
-			morphViewer.setImageSrc(srcViewer.getImage().Source);
+			morphViewer.setImageSrc(img);
 			modeItem.Header = "Change Control Lines";
 			modeItem.Click -= Morph_Click;
 			modeItem.Click += ChangeControlLines_Click;
