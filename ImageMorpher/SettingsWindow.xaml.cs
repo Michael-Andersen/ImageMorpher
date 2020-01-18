@@ -88,6 +88,7 @@ namespace ImageMorpher
 			//	double dist = ControlLine.distance(test, 60, 40);
 			//	double fl = ControlLine.fracLength(test, 60, 40);
 			}
+			Morpher.NumFrames = (int)framesSlider.Value;
 		}
 
 		private void LineColour_SelectionChanged(object sender, SelectionChangedEventArgs e)

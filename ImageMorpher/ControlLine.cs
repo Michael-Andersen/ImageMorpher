@@ -116,6 +116,19 @@ namespace ImageMorpher
 			return pX;
 		}
 
+		public static double startDistance(ControlLine vector, double x, double y)
+		{
+			return Math.Pow(pX(vector, x, y).VectX * pX(vector, x, y).VectX +
+				pX(vector, x, y).VectY * pX(vector, x, y).VectY, 0.5);
+		}
+		public static double endDistance(ControlLine vector, double x, double y)
+		{
+			vector.StartPixelX = vector.EndPixelX;
+			vector.StartPixelY = vector.EndPixelY;
+			return Math.Pow(pX(vector, x, y).VectX * pX(vector, x, y).VectX +
+				pX(vector, x, y).VectY * pX(vector, x, y).VectY, 0.5);
+		}
+
 		public static double distance(ControlLine vector, double x, double y)
 		{
 			return proj(xP(vector, x, y), vector.NormX, vector.NormY);

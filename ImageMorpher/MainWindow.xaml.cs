@@ -24,6 +24,7 @@ namespace ImageMorpher
 	public partial class MainWindow : Window
 	{
 		private SettingsWindow settings;
+		private Morpher morph;
 
 		public MainWindow()
 		{
@@ -33,6 +34,8 @@ namespace ImageMorpher
 			srcViewer.IsSrc = true;
 			destViewer.IsSrc = false;
 			settings = new SettingsWindow(srcViewer, destViewer);
+		    morph = new Morpher();
+			morphViewer.Morph = morph;
 			morphViewer.Visibility = Visibility.Collapsed;
 		}
 
@@ -68,6 +71,12 @@ namespace ImageMorpher
 				save.LineThickness = ControlLine.LINE_THICKNESS;
 				save.Diameter = ControlLine.DIAMETER;
 				save.Tolerance = ControlPoint.TOLERANCE;
+				save.FrameSrcs = new List<string>();
+				for (int i = 0; i < morph.Frames.Count; i++)
+				{
+					save.FrameSrcs.Add("c:\\Users\\Mike\\Downloads\\" + morph.UUID + "_" + i + ".png");
+				}
+				
 				serializer.Serialize(SaveFileStream, save);
 				SaveFileStream.Close();
 			}
@@ -80,10 +89,18 @@ namespace ImageMorpher
 			{
 				Stream openFileStream = File.OpenRead(openFileDialog.FileName);
 				BinaryFormatter deserializer = new BinaryFormatter();
-				//must be temporarily set to 0 to ensure it's lower than saved tolerance due sorted dictionary
+				//must be temporarily set to 0 to ensure it's lower than saved tolerance due to sorted dictionary
 				ControlPoint.TOLERANCE = 0; 
 				ProjectPersistence loaded = (ProjectPersistence)deserializer.Deserialize(openFileStream);
 				loadSettings(loaded);
+				if (loaded.FrameSrcs.Count > 0) { 
+					for (int i = 0; i < loaded.FrameSrcs.Count; i++)
+					{
+						BitmapSource bms = new BitmapImage(new Uri(@loaded.FrameSrcs[i]));
+						morph.Frames.Add(bms);
+					} 
+					morph.Morphed = true;
+				}
 				srcViewer.loadProject(loaded.SrcControlLines, loaded.SrcControlDict, loaded.SrcImageFilename);
 				destViewer.loadProject(loaded.DestControlLines, loaded.DestControlDict, 
 					loaded.DestImageFilename);
@@ -99,16 +116,20 @@ namespace ImageMorpher
 
 		private void Morph_Click(object sender, RoutedEventArgs e)
 		{
-			Morpher morph = new Morpher();
 			morph.SrcLines = srcViewer.ControlLines;
 			morph.DestLines = destViewer.ControlLines;
 			morph.setSrc((BitmapSource)srcViewer.ImageSrc);
 			morph.setDest((BitmapSource)destViewer.ImageSrc);
-			ImageSource img = morph.getFrame((BitmapSource)srcViewer.ImageSrc);
+			if (!morph.Morphed)
+			{
+				morph.setFrames((BitmapSource)srcViewer.ImageSrc);
+			}
 			srcViewer.Visibility = Visibility.Hidden;
 			destViewer.Visibility = Visibility.Hidden;
 			morphViewer.Visibility = Visibility.Visible;
-			morphViewer.setImageSrc(img);
+			morphViewer.Src = srcViewer.ImageSrc;
+			morphViewer.Dest = destViewer.ImageSrc;
+			morphViewer.setImageSrc(morphViewer.Src);
 			modeItem.Header = "Change Control Lines";
 			modeItem.Click -= Morph_Click;
 			modeItem.Click += ChangeControlLines_Click;
