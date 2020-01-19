@@ -49,6 +49,22 @@ namespace ImageMorpher
 
 		public string ImgFileName { get; set; }
 
+		public Point GridToPixel(Point p)
+		{
+			Point imagePoint = grid.TranslatePoint(p, image);
+			double pixelX = (int)(imagePoint.X * ((BitmapSource)image.Source).PixelWidth / image.ActualWidth);
+			double pixelY = (int)(imagePoint.Y * ((BitmapSource)image.Source).PixelHeight / image.ActualHeight);
+			return new Point(pixelX, pixelY);
+		}
+
+		public Point PixelToGrid(Point p)
+		{
+			double imageX = (int)(p.X * image.ActualWidth / ((BitmapSource)image.Source).PixelWidth);
+			double imageY = (int)(p.Y * image.ActualHeight / ((BitmapSource)image.Source).PixelHeight);
+			return image.TranslatePoint(new Point(imageX, imageY), grid);
+		}
+
+
 		public Image getImage()
 		{
 			return image;
@@ -162,15 +178,16 @@ namespace ImageMorpher
 			{
 				crop();
 			}
+			UpdateLayout();
 			foreach (ControlLine cl in ControlLines)
 			{
-				cl.drawLine(canvas);
+				reDrawLine(cl);
 			}
 		}
 
 		private void mouseDown(object sender, MouseButtonEventArgs e)
 		{
-			if (image.Source == null)
+			if (image.Source == null || otherViewer.image.Source == null)
 			{
 				return;
 			}
@@ -183,10 +200,6 @@ namespace ImageMorpher
 				clearSelection();
 			}
 			Point mouseDownPos = e.GetPosition(grid);
-			double test = e.GetPosition(image).X;
-			double test2 = e.GetPosition(image).Y;
-			double pixelMousePositionX = e.GetPosition(image).X * ((BitmapSource)image.Source).PixelWidth / image.ActualWidth;
-			double pixelMousePositionY = e.GetPosition(image).Y * ((BitmapSource)image.Source).PixelHeight / image.ActualHeight;
 			ControlPoint downControlPoint = new ControlPoint(mouseDownPos);
 			if (ControlLineDict.ContainsKey(downControlPoint))
 			{
@@ -194,7 +207,8 @@ namespace ImageMorpher
 			}
 			else
 			{
-				mouseDown_NewLine(mouseDownPos, pixelMousePositionX, pixelMousePositionX);
+				Point pixelPoint = GridToPixel(mouseDownPos);
+				mouseDown_NewLine(mouseDownPos);
 			}
 		}
 
@@ -206,10 +220,10 @@ namespace ImageMorpher
 			otherViewer.Selected = false;
 		}
 
-		private void mouseDown_NewLine(Point mouseDownPos, double pixelX, double pixelY)
+		private void mouseDown_NewLine(Point mouseDownPos)
 		{
-			createLineStart(mouseDownPos, pixelX, pixelY);
-			currentLine.Pair = otherViewer.createLineStart(mouseDownPos, pixelX, pixelY);
+			createLineStart(mouseDownPos);
+			currentLine.Pair = otherViewer.createLineStart(mouseDownPos);
 			otherViewer.currentLine.Pair = currentLine;
 			editState = EditState.NewLine;
 		}
@@ -225,18 +239,18 @@ namespace ImageMorpher
 			otherViewer.highlightLine();
 			highlightLine();
 			currentLine = cl;
-			prevEnd = cl.End;
-			prevMid = cl.Middle;
-			prevStart = cl.Start;
-			if (downControlPoint.CompareTo(cl.Start) == 0)
+			prevEnd = ((ControlLineVisual)cl).End;
+			prevMid = ((ControlLineVisual)cl).Middle;
+			prevStart = ((ControlLineVisual)cl).Start;
+			if (downControlPoint.CompareTo(((ControlLineVisual)cl).Start) == 0)
 			{
 				editState = EditState.Start;
 			}
-			else if (downControlPoint.CompareTo(cl.Middle) == 0)
+			else if (downControlPoint.CompareTo(((ControlLineVisual)cl).Middle) == 0)
 			{
 				editState = EditState.Middle;
 			}
-			else if (downControlPoint.CompareTo(cl.End) == 0)
+			else if (downControlPoint.CompareTo(((ControlLineVisual)cl).End) == 0)
 			{
 				editState = EditState.End;
 			}
@@ -244,12 +258,12 @@ namespace ImageMorpher
 
 		public void highlightLine()
 		{
-			ControlLines[EditIndex].highlight();
+			((ControlLineVisual)ControlLines[EditIndex]).highlight();
 		}
 
 		public void deHighlightLine()
 		{
-			ControlLines[EditIndex].deHighlight();
+			((ControlLineVisual)ControlLines[EditIndex]).deHighlight();
 		}
 
 		public void updateVisualSettings()
@@ -257,43 +271,41 @@ namespace ImageMorpher
 			canvas.Children.Clear();
 			foreach (ControlLine cl in ControlLines)
 			{
-				cl.drawLine(canvas);
+				((ControlLineVisual)cl).drawLine(this);
 			}
 		}
 
-		private ControlLine createLineStart(Point mouseDownPos, double pixelX, double pixelY)
+		private ControlLine createLineStart(Point mouseDownPos)
 		{
 
-			currentLine = new ControlLine(canvas, new ControlPoint(mouseDownPos), pixelX, pixelY);
+			currentLine = new ControlLineVisual(this, new ControlPoint(mouseDownPos));
 			currentLine.IsSrc = IsSrc;
 			return currentLine;
 		}
 
 		private void mouseMove(object sender, MouseEventArgs e)
 		{
-			if (image.Source == null)
+			if (image.Source == null || otherViewer.image.Source == null)
 			{
 				return;
 			}
 			Point mousePos = e.GetPosition(grid);
-			double pixelX = e.GetPosition(image).X * ((BitmapSource)image.Source).PixelWidth / image.ActualWidth;
-			double pixelY = e.GetPosition(image).Y * ((BitmapSource)image.Source).PixelHeight / image.ActualHeight;
+			Point pixelPos = GridToPixel(mousePos);
 			switch (editState)
 			{
 				case EditState.NewLine:
-					createLineDrag(mousePos, pixelX, pixelY);
-					otherViewer.createLineDrag(mousePos, pixelX, pixelY);
+					createLineDrag(mousePos);
+					otherViewer.createLineDrag(mousePos);
 					break;
 				case EditState.Start:
-					currentLine.setStart(new ControlPoint(mousePos), pixelX, pixelY);
-					currentLine.setMiddle();
+					((ControlLineVisual)currentLine).drawStart(new ControlPoint(mousePos));
+					((ControlLineVisual)currentLine).drawMiddle();
 					break;
 				case EditState.Middle:
-					currentLine.moveMiddle(new ControlPoint(mousePos));
+					((ControlLineVisual)currentLine).moveMiddle(new ControlPoint(mousePos));
 					break;
 				case EditState.End:
-
-					currentLine.setEnd(new ControlPoint(mousePos), pixelX, pixelY);
+					((ControlLineVisual)currentLine).drawEnd(new ControlPoint(mousePos));
 					break;
 				case EditState.None:
 					ControlPoint downControlPoint = new ControlPoint(mousePos);
@@ -310,30 +322,33 @@ namespace ImageMorpher
 			}
 		}
 
-		private void createLineDrag(Point mousePos, double pixelX, double pixelY)
+		private void createLineDrag(Point mousePos)
 		{
-			currentLine.setEnd(new ControlPoint(mousePos), pixelX, pixelY);
+			((ControlLineVisual)currentLine).drawEnd(new ControlPoint(mousePos));
 		}
 
 		private void mouseUp(object sender, MouseButtonEventArgs e)
 		{
+			if (image.Source == null || otherViewer.image.Source == null)
+			{
+				return;
+			}
 			Point mouseUpPos = e.GetPosition(grid);
-			double pixelX = e.GetPosition(image).X * ((BitmapSource)image.Source).PixelWidth / image.ActualWidth;
-			double pixelY = e.GetPosition(image).Y * ((BitmapSource)image.Source).PixelHeight / image.ActualHeight;
+			Point pixelPos = GridToPixel(mouseUpPos);
 			grid.ReleaseMouseCapture();
 			switch (editState)
 			{
 				case EditState.NewLine:
-					mouseUp_NewLine(mouseUpPos, pixelX, pixelY);
+					mouseUp_NewLine(mouseUpPos);
 					break;
 				case EditState.Start:
-					mouseUp_Start(mouseUpPos, pixelX, pixelY);
+					mouseUp_Start(mouseUpPos);
 					break;
 				case EditState.Middle:
 					mouseUp_Middle(mouseUpPos);
 					break;
 				case EditState.End:
-					mouseUp_End(mouseUpPos, pixelX, pixelY);
+					mouseUp_End(mouseUpPos);
 					break;
 				default:
 					break;
@@ -341,49 +356,52 @@ namespace ImageMorpher
 			editState = EditState.None;
 		}
 
-		private void mouseUp_NewLine(Point mouseUpPos, double pixelX, double pixelY)
+		private void mouseUp_NewLine(Point mousePos)
 		{
-			createLineEnd(mouseUpPos, pixelX, pixelY);
-			otherViewer.createLineEnd(mouseUpPos, pixelX, pixelY);
+			createLineEnd(mousePos);
+			otherViewer.createLineEnd(mousePos);
 		}
 
-		private void mouseUp_Start(Point mouseUpPos, double pixelX, double pixelY)
+		private void mouseUp_Start(Point mousePos)
 		{
 			removeFromDict(prevStart);
 			removeFromDict(prevMid);
-			currentLine.setStart(new ControlPoint(mouseUpPos), pixelX, pixelY);
-			currentLine.setMiddle();
-			addToDict(currentLine.Start);
-			addToDict(currentLine.Middle);
+			((ControlLineVisual)currentLine).drawStart(new ControlPoint(mousePos));
+			currentLine.setStart(GridToPixel(mousePos));
+			((ControlLineVisual)currentLine).drawMiddle();
+			addToDict(((ControlLineVisual)currentLine).Start);
+			addToDict(((ControlLineVisual)currentLine).Middle);
 		}
 
-		private void mouseUp_Middle(Point mouseUpPos)
+		private void mouseUp_Middle(Point mousePos)
 		{
 			removeFromDict(prevStart);
 			removeFromDict(prevMid);
 			removeFromDict(prevEnd);
-			currentLine.moveMiddle(new ControlPoint(mouseUpPos));
-			addToDict(currentLine.Start);
-			addToDict(currentLine.Middle);
-			addToDict(currentLine.End);
+			((ControlLineVisual)currentLine).moveMiddle(new ControlPoint(mousePos));
+			addToDict(((ControlLineVisual)currentLine).Start);
+			addToDict(((ControlLineVisual)currentLine).Middle);
+			addToDict(((ControlLineVisual)currentLine).End);
 		}
 
-		private void mouseUp_End(Point mouseUpPos, double pixelX, double pixelY)
+		private void mouseUp_End(Point mousePos)
 		{
 			removeFromDict(prevEnd);
 			removeFromDict(prevMid);
-			currentLine.setEnd(new ControlPoint(mouseUpPos), pixelX, pixelY);
-			addToDict(currentLine.End);
-			addToDict(currentLine.Middle);
+			((ControlLineVisual)currentLine).drawEnd(new ControlPoint(mousePos));
+			((ControlLineVisual)currentLine).setEnd(GridToPixel(mousePos));
+			addToDict(((ControlLineVisual)currentLine).End);
+			addToDict(((ControlLineVisual)currentLine).Middle);
 		}
 
-		private void createLineEnd(Point mouseUpPos, double pixelX, double pixelY)
+		private void createLineEnd(Point mousePos)
 		{
-			currentLine.setEnd(new ControlPoint(mouseUpPos), pixelX, pixelY);
+			((ControlLineVisual)currentLine).drawEnd(new ControlPoint(mousePos));
+			((ControlLineVisual)currentLine).setEnd(GridToPixel(mousePos));
 			ControlLines.Add(currentLine);
-			addToDict(currentLine.Start);
-			addToDict(currentLine.End);
-			addToDict(currentLine.Middle);
+			addToDict(((ControlLineVisual)currentLine).Start);
+			addToDict(((ControlLineVisual)currentLine).End);
+			addToDict(((ControlLineVisual)currentLine).Middle);
 		}
 
 		private void removeLine(object sender, RoutedEventArgs e)
@@ -404,10 +422,10 @@ namespace ImageMorpher
 		public void destroySelectedLine()
 		{
 			currentLine = ControlLines[EditIndex];
-			removeFromDict(currentLine.Start);
-			removeFromDict(currentLine.Middle);
-			removeFromDict(currentLine.End);
-			currentLine.removeFromCanvas(canvas);
+			removeFromDict(((ControlLineVisual)currentLine).Start);
+			removeFromDict(((ControlLineVisual)currentLine).Middle);
+			removeFromDict(((ControlLineVisual)currentLine).End);
+			((ControlLineVisual)currentLine).removeFromCanvas();
 			ControlLines.Remove(currentLine);
 			Selected = false;
 		}
@@ -446,5 +464,29 @@ namespace ImageMorpher
 				}
 			}
 		}
+		
+		private void SizeChangedEventHandler(Object sender, SizeChangedEventArgs e)
+		{
+			canvas.Children.Clear();
+			foreach (ControlLine cl in ControlLines)
+			{
+				reDrawLine(cl);
+			}
+		}
+
+		private void reDrawLine(ControlLine cl)
+		{
+			currentLine = cl;
+			removeFromDict(((ControlLineVisual)cl).Start);
+			removeFromDict(((ControlLineVisual)cl).Middle);
+			removeFromDict(((ControlLineVisual)cl).End);
+			((ControlLineVisual)cl).Start = new ControlPoint(PixelToGrid(((ControlLineVisual)cl).StartPixel));
+			((ControlLineVisual)cl).End = new ControlPoint(PixelToGrid(((ControlLineVisual)cl).EndPixel));
+			((ControlLineVisual)cl).drawLine(this);
+			addToDict(((ControlLineVisual)cl).Start);
+			addToDict(((ControlLineVisual)cl).Middle);
+			addToDict(((ControlLineVisual)cl).End);
+		}
+
 	}
 }

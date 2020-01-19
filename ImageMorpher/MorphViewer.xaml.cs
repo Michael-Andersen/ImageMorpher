@@ -44,7 +44,7 @@ namespace ImageMorpher
 			UpdateLayout();
 			await Task.Run(() =>
 			{
-				Thread.Sleep(25);
+				Thread.Sleep(40);
 			});
 			for (int i = 0; i < Morph.Frames.Count; i++)
 			{
@@ -52,7 +52,7 @@ namespace ImageMorpher
 				UpdateLayout();
 				await Task.Run(() =>
 				{
-					Thread.Sleep(25);
+					Thread.Sleep(40);
 				});
 			}
 			setImageSrc(Dest);
@@ -93,7 +93,7 @@ namespace ImageMorpher
 			UpdateLayout();
 			await Task.Run(() =>
 			{
-				Thread.Sleep(25);
+				Thread.Sleep(40);
 			});
 			for (int i = Morph.Frames.Count - 1; i >= 0; i--)
 			{
@@ -101,7 +101,7 @@ namespace ImageMorpher
 				UpdateLayout();
 				await Task.Run(() =>
 				{
-					Thread.Sleep(25);
+					Thread.Sleep(40);
 				});
 			}
 			setImageSrc(Src);

@@ -28,11 +28,11 @@ namespace ImageMorpher
 		public SettingsWindow(ImageViewer srcViewer, ImageViewer destViewer)
 		{
 			InitializeComponent();
-			lineComboBox.ItemsSource = Enum.GetValues(typeof(ControlLine.Colour)).Cast<ControlLine.Colour>();
-			startComboBox.ItemsSource = Enum.GetValues(typeof(ControlLine.Colour)).Cast<ControlLine.Colour>();
-			middleComboBox.ItemsSource = Enum.GetValues(typeof(ControlLine.Colour)).Cast<ControlLine.Colour>();
-			endComboBox.ItemsSource = Enum.GetValues(typeof(ControlLine.Colour)).Cast<ControlLine.Colour>();
-			highlightComboBox.ItemsSource = Enum.GetValues(typeof(ControlLine.Colour)).Cast<ControlLine.Colour>();
+			lineComboBox.ItemsSource = Enum.GetValues(typeof(ControlLineVisual.Colour)).Cast<ControlLineVisual.Colour>();
+			startComboBox.ItemsSource = Enum.GetValues(typeof(ControlLineVisual.Colour)).Cast<ControlLineVisual.Colour>();
+			middleComboBox.ItemsSource = Enum.GetValues(typeof(ControlLineVisual.Colour)).Cast<ControlLineVisual.Colour>();
+			endComboBox.ItemsSource = Enum.GetValues(typeof(ControlLineVisual.Colour)).Cast<ControlLineVisual.Colour>();
+			highlightComboBox.ItemsSource = Enum.GetValues(typeof(ControlLineVisual.Colour)).Cast<ControlLineVisual.Colour>();
 			this.srcViewer = srcViewer;
 			this.destViewer = destViewer;
 		}
@@ -49,8 +49,8 @@ namespace ImageMorpher
 			}
 		}
 
-		public void load(double lineThickness, double diameter, double tolerance, ControlLine.Colour lineColour,
-			ControlLine.Colour start, ControlLine.Colour middle, ControlLine.Colour end, ControlLine.Colour highlight)
+		public void load(double lineThickness, double diameter, double tolerance, ControlLineVisual.Colour lineColour,
+			ControlLineVisual.Colour start, ControlLineVisual.Colour middle, ControlLineVisual.Colour end, ControlLineVisual.Colour highlight)
 		{
 			lineThicknessSlider.Value = lineThickness;
 			diameterSlider.Value = diameter;
@@ -64,13 +64,13 @@ namespace ImageMorpher
 
 		private void LineSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-			ControlLine.LINE_THICKNESS = (int)lineThicknessSlider.Value;
+			ControlLineVisual.LINE_THICKNESS = (int)lineThicknessSlider.Value;
 			visualChange();
 		}
 
 		private void DiameterSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-			ControlLine.DIAMETER = (int)diameterSlider.Value;
+			ControlLineVisual.DIAMETER = (int)diameterSlider.Value;
 			visualChange();
 		}
 
@@ -93,31 +93,31 @@ namespace ImageMorpher
 
 		private void LineColour_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			ControlLine.LINE_COLOUR = (ControlLine.Colour)((sender as ComboBox).SelectedItem);
+			ControlLineVisual.LINE_COLOUR = (ControlLineVisual.Colour)((sender as ComboBox).SelectedItem);
 			visualChange();
 		}
 
 		private void StartColour_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			ControlLine.START_COLOUR = (ControlLine.Colour)((sender as ComboBox).SelectedItem);
+			ControlLineVisual.START_COLOUR = (ControlLineVisual.Colour)((sender as ComboBox).SelectedItem);
 			visualChange();
 		}
 
 		private void MiddleColour_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			ControlLine.MIDDLE_COLOUR = (ControlLine.Colour)((sender as ComboBox).SelectedItem);
+			ControlLineVisual.MIDDLE_COLOUR = (ControlLineVisual.Colour)((sender as ComboBox).SelectedItem);
 			visualChange();
 		}
 
 		private void EndColour_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			ControlLine.END_COLOUR = (ControlLine.Colour)((sender as ComboBox).SelectedItem);
+			ControlLineVisual.END_COLOUR = (ControlLineVisual.Colour)((sender as ComboBox).SelectedItem);
 			visualChange();
 		}
 
 		private void HighlightColour_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			ControlLine.HIGHLIGHT_COLOUR = (ControlLine.Colour)((sender as ComboBox).SelectedItem);
+			ControlLineVisual.HIGHLIGHT_COLOUR = (ControlLineVisual.Colour)((sender as ComboBox).SelectedItem);
 			visualChange();
 		}
 

@@ -12,11 +12,11 @@ namespace ImageMorpher
 	[Serializable]
 	public class ProjectPersistence
 	{
-		public ControlLine.Colour LineColour { get; set; }
-		public ControlLine.Colour StartColour { get; set; }
-		public ControlLine.Colour MiddleColour { get; set; }
-		public ControlLine.Colour EndColour { get; set; }
-		public ControlLine.Colour HighlightColour { get; set; }
+		public ControlLineVisual.Colour LineColour { get; set; }
+		public ControlLineVisual.Colour StartColour { get; set; }
+		public ControlLineVisual.Colour MiddleColour { get; set; }
+		public ControlLineVisual.Colour EndColour { get; set; }
+		public ControlLineVisual.Colour HighlightColour { get; set; }
 		public double Tolerance { get; set; }
 		public double LineThickness { get; set; }
 		public double Diameter { get; set; }

@@ -14,139 +14,46 @@ namespace ImageMorpher
 	[Serializable]
     public class ControlLine
 	{
-		[NonSerialized]
-		private Line drawnLine;
-		[NonSerialized]
-		private Ellipse drawnStart;
-		[NonSerialized]
-		private Ellipse drawnEnd;
-		[NonSerialized]
-		private Ellipse drawnMiddle;
-
-
-		public enum Colour
-		{
-			Red, Green, Blue, Orange, Black, White, Brown, Purple, Gray
-		}
-
-		public static double DIAMETER = 5;
-		public static double LINE_THICKNESS = 1;
-		public static Colour START_COLOUR = Colour.Green;
-		public static Colour MIDDLE_COLOUR = Colour.Blue;
-		public static Colour END_COLOUR = Colour.Red;
-		public static Colour HIGHLIGHT_COLOUR = Colour.Purple;
-		public static Colour LINE_COLOUR = Colour.Black;
-		private static Dictionary<Colour, SolidColorBrush> colourDict
-			= new Dictionary<Colour, SolidColorBrush>();
-
-		public ControlPoint Start { get; set; }
-		public ControlPoint End { get; set; }
-		public ControlPoint Middle { get; set; }
 
 		public bool IsSrc { get; set; }
 		public ControlLine Pair { get; set; }
-		public double Length { get; set; }
-		public double LengthSq { get; set; }
-		public double VectX { get; set; }
-		public double VectY { get; set; }
-		public double NormX { get; set; }
-		public double NormY { get; set; }
-		public double NormLength { get; set; }
-		public double StartPixelX { get; set; }
-		public double StartPixelY { get; set; }
-		public double EndPixelX { get; set; }
-		public double EndPixelY { get; set; }
+		public Vector Vect { get; set; }
+		public Vector Norm { get; set; }
+		public Point StartPixel { get; set; }
+		public Point EndPixel { get; set; }
 
-	static ControlLine()
+		public static double proj(Vector vector, Vector on)
 		{
-			colourDict.Add(Colour.Red, Brushes.Red);
-			colourDict.Add(Colour.Green, Brushes.Green);
-			colourDict.Add(Colour.Gray, Brushes.Gray);
-			colourDict.Add(Colour.Blue, Brushes.Blue);
-			colourDict.Add(Colour.Black, Brushes.Black);
-			colourDict.Add(Colour.Brown, Brushes.Brown);
-			colourDict.Add(Colour.White, Brushes.White);
-			colourDict.Add(Colour.Orange, Brushes.Orange);
-			colourDict.Add(Colour.Purple, Brushes.Purple);
+			return vector * on / on.Length;
 		}
 
-		public static double dotProduct(ControlLine a, double X, double Y)
+		public Vector xP(Point x)
 		{
-			return a.VectX * X + a.VectY * Y;
+			return StartPixel - x;
 		}
 
-		public static double dotProduct(ControlLine a, ControlLine b)
+		public Vector pX(Point x)
 		{
-			return a.VectX * b.VectX + a.VectY * b.VectY;
+			return x - StartPixel;
 		}
 
-		public static double proj(ControlLine vector, double X, double Y)
+		public double startDistance(Point x)
 		{
-			return dotProduct(vector, X, Y) / Math.Pow(X * X + Y * Y, 0.5);
+			return pX(x).Length;
+		}
+		public double endDistance(Point x)
+		{
+			return (x - EndPixel).Length;
 		}
 
-		public static double proj(ControlLine vector, ControlLine on)
+		public double distance(Point x)
 		{
-			return dotProduct(vector, on) / on.Length;
+			return proj(xP(x), Norm);
 		}
 
-		public static double calcLenSq(ControlLine vector)
+		public double fracLength(Point x)
 		{
-			return vector.VectX * vector.VectX + vector.VectY * vector.VectY;
-		}
-
-		public static double calcLen(ControlLine vector)
-		{
-			return Math.Pow(calcLenSq(vector), 0.5);
-		}
-
-		public static ControlLine xP(ControlLine vector, double x, double y)
-		{
-			ControlLine xP = new ControlLine();
-			xP.VectX = vector.StartPixelX - x;
-			xP.VectY = vector.StartPixelY - y;
-			return xP;
-		}
-
-		public static ControlLine pX(ControlLine vector, double x, double y)
-		{
-			ControlLine pX = new ControlLine();
-			pX.VectX = -1 * (vector.StartPixelX - x);
-			pX.VectY = -1 * (vector.StartPixelY - y);
-			return pX;
-		}
-
-		public static double startDistance(ControlLine vector, double x, double y)
-		{
-			return Math.Pow(pX(vector, x, y).VectX * pX(vector, x, y).VectX +
-				pX(vector, x, y).VectY * pX(vector, x, y).VectY, 0.5);
-		}
-		public static double endDistance(ControlLine vector, double x, double y)
-		{
-			vector.StartPixelX = vector.EndPixelX;
-			vector.StartPixelY = vector.EndPixelY;
-			return Math.Pow(pX(vector, x, y).VectX * pX(vector, x, y).VectX +
-				pX(vector, x, y).VectY * pX(vector, x, y).VectY, 0.5);
-		}
-
-		public static double distance(ControlLine vector, double x, double y)
-		{
-			return proj(xP(vector, x, y), vector.NormX, vector.NormY);
-		}
-
-		public static double fracLength(ControlLine vector, double x, double y)
-		{
-			return dotProduct(vector, pX(vector, x, y)) / vector.LengthSq;
-		}
-
-		public ControlLine(Canvas canvas, ControlPoint o, double pixelX, double pixelY)
-		{
-			initVisuals();
-			setThickness();
-			setColours();
-			addToCanvas(canvas);
-			setStart(o, pixelX, pixelY);
-			setEnd(o, pixelX, pixelY);
+			return (pX(x)*Vect) / Vect.LengthSquared;
 		}
 
 		public ControlLine()
@@ -155,143 +62,38 @@ namespace ImageMorpher
 		}
 
 
-		public ControlLine(double startPX, double startPY, double endPX, double endPY)
+		public ControlLine(Point start, Point end)
 		{
-			StartPixelX = startPX;
-			StartPixelY = startPY;
-			EndPixelX = endPX;
-			EndPixelY = endPY;
+			StartPixel = start;
+			EndPixel = end;
 			setVector();
 		}
 
-		private void addToCanvas(Canvas canvas)
-		{
-			canvas.Children.Add(drawnLine);
-			canvas.Children.Add(drawnStart);
-			canvas.Children.Add(drawnEnd);
-			canvas.Children.Add(drawnMiddle);
-		}
-		private void setColours()
-		{
-			drawnStart.Fill = colourDict[START_COLOUR];
-			drawnLine.Fill = colourDict[LINE_COLOUR];
-			drawnLine.Stroke = colourDict[LINE_COLOUR];
-			drawnEnd.Fill = colourDict[END_COLOUR];
-			drawnMiddle.Fill = colourDict[MIDDLE_COLOUR];
+		public void setStart(Point p) {
+			StartPixel = p;
+			setVector();
 		}
 
-		private void setThickness()
+		public void setEnd(Point p)
 		{
-			drawnStart.Width = DIAMETER;
-			drawnStart.Height = DIAMETER;
-			drawnLine.StrokeThickness = LINE_THICKNESS;
-			drawnEnd.Width = DIAMETER;
-			drawnEnd.Height = DIAMETER;
-			drawnMiddle.Width = DIAMETER;
-			drawnMiddle.Height = DIAMETER;
-		}
-		private void initVisuals()
-		{
-			drawnLine = new Line();
-			drawnStart = new Ellipse();
-			drawnEnd = new Ellipse();
-			drawnMiddle = new Ellipse();
-		}
-		public void drawLine(Canvas canvas)
-		{
-			initVisuals();
-			setThickness();
-			setColours();
-			addToCanvas(canvas);
-			setStart(Start);
-			setEnd(End, -1, -1);
-		}
-
-		public void highlight()
-		{
-			drawnLine.Fill = colourDict[HIGHLIGHT_COLOUR];
-			drawnLine.Stroke = colourDict[HIGHLIGHT_COLOUR];
-			drawnMiddle.Fill = colourDict[HIGHLIGHT_COLOUR];
-		}
-
-		public void deHighlight()
-		{
-			drawnLine.Fill = colourDict[LINE_COLOUR];
-			drawnLine.Stroke = colourDict[LINE_COLOUR];
-			drawnMiddle.Fill = colourDict[MIDDLE_COLOUR];
-		}
-
-		public void removeFromCanvas(Canvas canvas)
-		{
-			canvas.Children.Remove(drawnLine);
-			canvas.Children.Remove(drawnStart);
-			canvas.Children.Remove(drawnMiddle);
-			canvas.Children.Remove(drawnEnd);
-			canvas.UpdateLayout();
-		}
-
-		public void setStart(ControlPoint o, double pixelX = -1, double pixelY = -1)
-		{
-			Start = o;
-			drawnLine.X1 = o.Point.X;
-			drawnLine.Y1 = o.Point.Y;
-			Canvas.SetLeft(drawnStart, o.Point.X - 2.5);
-			Canvas.SetTop(drawnStart, o.Point.Y - 2.5);
-			if (pixelX >= 0)
-			{ 
-				StartPixelX = pixelX;
-				StartPixelY = pixelY;
-				setVector();
-			}
-		}
-
-		public void setEnd(ControlPoint o, double xPixel, double yPixel, bool newMiddle=true)
-		{
-			End = o;
-			Canvas.SetLeft(drawnEnd, o.Point.X - 2.5);
-			Canvas.SetTop(drawnEnd, o.Point.Y - 2.5);
-			setMiddle(newMiddle);
-			drawnLine.X2 = o.Point.X;
-			drawnLine.Y2 = o.Point.Y;
-			if (xPixel >= 0)
-			{
-				EndPixelX = xPixel;
-				EndPixelY = yPixel;
-				setVector();
-			}
+			EndPixel = p;
+			setVector();
 		}
 		private void setVector()
 		{
-			VectX = EndPixelX - StartPixelX;
-			VectY = EndPixelY - StartPixelY;
-			LengthSq = calcLenSq(this);
-			Length = calcLen(this);
-			NormX = -1 * VectY;
-			NormY = VectX;
-			NormLength = Math.Pow(NormX * NormX + NormY * NormY, 0.5);
-		}
-		public void setMiddle(bool newMiddle=true)
-		{
-			if (newMiddle)
+			Vect = EndPixel - StartPixel;
+			if (Vect.X == 0 && Vect.Y == 0)
 			{
-				Point middlePoint = new Point();
-				middlePoint.X = (Start.Point.X + End.Point.X) / 2;
-				middlePoint.Y = (Start.Point.Y + End.Point.Y) / 2;
-				Middle = new ControlPoint(middlePoint);
+				Vect = new Vector(0.001, 0.001);
 			}
-			Canvas.SetLeft(drawnMiddle, Middle.Point.X - 2.5);
-			Canvas.SetTop(drawnMiddle, Middle.Point.Y - 2.5);
+			Norm = new Vector(-Vect.Y, Vect.X);
+			
 		}
 
-		public void moveMiddle(ControlPoint o)
+		public void middleTranslation(Point start, Point end)
 		{
-			double xtranslation = o.Point.X - Middle.Point.X;
-			double ytranslation = o.Point.Y - Middle.Point.Y;
-			Middle = o;
-			Point startPoint = new Point(Start.Point.X + xtranslation, Start.Point.Y + ytranslation);
-			setStart(new ControlPoint(startPoint), StartPixelX + xtranslation, StartPixelY + ytranslation);
-			Point endPoint = new Point(End.Point.X + xtranslation, End.Point.Y + ytranslation);
-			setEnd(new ControlPoint(endPoint), EndPixelX + xtranslation, EndPixelY + ytranslation, false);
+			setStart(start);
+			setEnd(end);
 		}
 	}
 }
