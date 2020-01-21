@@ -21,8 +21,8 @@ namespace ImageMorpher
 		public List<BitmapSource> Frames { set; get; }
 		public List<ControlLine> SrcLines { get; set; }
 		public List<ControlLine> DestLines { get; set; }
-		public double A_VALUE = 0.01;
-		public double B_VALUE = 2;
+		public static double A_VALUE = 0.01;
+		public static double B_VALUE = 2;
 		public bool Morphed = false;
 		public string UUID;
 		public int index = 0;

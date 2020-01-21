@@ -27,6 +27,12 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*" />
@@ -71,37 +77,65 @@
             <TextBox Text="{Binding ElementName=framesSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="framesBox"/>
         </Grid>
         <Grid Grid.Column="0" Grid.Row="8">
+            <Label>Frame Rate (Frames/Second)</Label>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="8">
+            <Slider IsSnapToTickEnabled="True"
+    TickFrequency="1" ValueChanged="FrameRateSlider_ValueChanged" x:Name="frameRateSlider"  Maximum="120" Width ="100" Minimum="1" Value="13"></Slider>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="9">
+            <TextBox Text="{Binding ElementName=frameRateSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="frameRateBox"/>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="10">
+            <Label>A Value (Weighting Distance Offset)</Label>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="10">
+            <Slider ValueChanged="ASlider_ValueChanged" x:Name="ASlider"  Maximum="1" Width ="100" Minimum="0.0001" Value="0.01"></Slider>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="11">
+            <TextBox Text="{Binding ElementName=ASlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="ABox"/>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="12">
+            <Label>B Value (Weighting Power)</Label>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="12">
+            <Slider ValueChanged="BSlider_ValueChanged" x:Name="BSlider"  Maximum="2" Width ="100" Minimum="1" Value="2"></Slider>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="13">
+            <TextBox Text="{Binding ElementName=BSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="BBox"/>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="14">
                 <Label>Line Colour</Label>
             </Grid>
-        <Grid Grid.Column="0" Grid.Row="9">
+        <Grid Grid.Column="0" Grid.Row="15">
             <ComboBox IsSynchronizedWithCurrentItem="True" SelectedIndex="4" x:Name="lineComboBox" SelectionChanged="LineColour_SelectionChanged">
             </ComboBox>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="10">
+        <Grid Grid.Column="0" Grid.Row="16">
             <Label>Line Start Colour</Label>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="11">
+        <Grid Grid.Column="0" Grid.Row="17">
             <ComboBox IsSynchronizedWithCurrentItem="True" SelectedIndex="1" x:Name="startComboBox" SelectionChanged="StartColour_SelectionChanged">
             </ComboBox>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="12">
+        <Grid Grid.Column="0" Grid.Row="18">
             <Label>Line Middle Colour</Label>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="13">
+        <Grid Grid.Column="0" Grid.Row="19">
             <ComboBox IsSynchronizedWithCurrentItem="True" SelectedIndex="2" x:Name="middleComboBox" SelectionChanged="MiddleColour_SelectionChanged">
             </ComboBox>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="14">
+        <Grid Grid.Column="0" Grid.Row="20">
             <Label>Line End Colour</Label>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="15">
+        <Grid Grid.Column="0" Grid.Row="21">
             <ComboBox IsSynchronizedWithCurrentItem="True" SelectedIndex="0" x:Name="endComboBox" SelectionChanged="EndColour_SelectionChanged">
             </ComboBox>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="16">
+        <Grid Grid.Column="0" Grid.Row="22">
             <Label>Line Highlight Colour</Label>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="17">
+        <Grid Grid.Column="0" Grid.Row="23">
             <ComboBox IsSynchronizedWithCurrentItem="True" SelectedIndex="7" x:Name="highlightComboBox" SelectionChanged="HighlightColour_SelectionChanged">
             </ComboBox>
         </Grid>

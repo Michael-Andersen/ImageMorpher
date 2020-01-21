@@ -22,10 +22,12 @@ namespace ImageMorpher
 	public partial class MorphViewer : UserControl
 	{
 		public int FrameIndex { get; set;}
+		public static int FrameRate { get; set; }
 		public Morpher Morph { get; set;}
 		public ImageSource Src { get; set;}
 		public ImageSource Dest { get; set;}
-		private BitmapSource[] bs;
+		public bool playing = false;
+		public bool reversing = false;
 
 		public MorphViewer()
 		{
@@ -40,23 +42,40 @@ namespace ImageMorpher
 
 		private async void playBtn_Click(object sender, RoutedEventArgs e)
 		{
-			setImageSrc(Src);
-			UpdateLayout();
-			await Task.Run(() =>
+			if (!playing)
 			{
-				Thread.Sleep(40);
-			});
-			for (int i = 0; i < Morph.Frames.Count; i++)
-			{
-				setImageSrc(Morph.Frames[i]);
+				playBtn.Content = "Pause";
+				playing = true;
+				//setImageSrc(Src);
 				UpdateLayout();
 				await Task.Run(() =>
 				{
-					Thread.Sleep(40);
+					Thread.Sleep(1000 / FrameRate);
 				});
+				for (; FrameIndex < Morph.Frames.Count; FrameIndex++)
+				{
+					if (playing) {
+						setImageSrc(Morph.Frames[FrameIndex]);
+						UpdateLayout();
+						await Task.Run(() =>
+						{
+							Thread.Sleep(1000 / FrameRate);
+						}); }
+					else {
+						break;
+					}
+				}
+				if (playing) {
+					FrameIndex = Morph.Frames.Count - 1;
+					setImageSrc(Dest);
+					UpdateLayout();
+					playBtn.Content = "Play";
+				}
+			} else
+			{
+				playBtn.Content = "Play";
+				playing = false;
 			}
-			setImageSrc(Dest);
-			UpdateLayout();
 		}
 		private void prevBtn_Click(object sender, RoutedEventArgs e)
 		{
@@ -87,25 +106,58 @@ namespace ImageMorpher
 			
 			UpdateLayout();
 		}
-		private async void reverseBtn_Click(object sender, RoutedEventArgs e)
+		private void startBtn_Click(object sender, RoutedEventArgs e)
 		{
+			FrameIndex = 0;
+			setImageSrc(Src);
+			UpdateLayout();
+		}
+		private void endBtn_Click(object sender, RoutedEventArgs e)
+		{
+			FrameIndex = Morph.Frames.Count - 1;
 			setImageSrc(Dest);
 			UpdateLayout();
-			await Task.Run(() =>
-			{
-				Thread.Sleep(40);
-			});
-			for (int i = Morph.Frames.Count - 1; i >= 0; i--)
-			{
-				setImageSrc(Morph.Frames[i]);
+		}
+		private async void reverseBtn_Click(object sender, RoutedEventArgs e)
+		{
+			if (!reversing) {
+				reverseBtn.Content = "Pause";
+				reversing = true;
+				//setImageSrc(Dest);
 				UpdateLayout();
 				await Task.Run(() =>
 				{
-					Thread.Sleep(40);
+					Thread.Sleep(1000 / FrameRate);
 				});
+				for (; FrameIndex >= 0; FrameIndex--)
+				{
+					if (reversing)
+					{
+						setImageSrc(Morph.Frames[FrameIndex]);
+						UpdateLayout();
+						await Task.Run(() =>
+						{
+							Thread.Sleep(1000 / FrameRate);
+						});
+					} else
+					{
+						break;
+					}
+				}
+				
+				if (reversing)
+				{
+					FrameIndex = 0;
+					setImageSrc(Src);
+					reverseBtn.Content = "Reverse";
+					UpdateLayout();
+				}
 			}
-			setImageSrc(Src);
-			UpdateLayout();
+			 else
+			{
+				reverseBtn.Content = "Reverse";
+				reversing = false;
+			}
 		}
 	}
 }
