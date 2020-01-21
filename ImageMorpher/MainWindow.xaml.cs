@@ -93,7 +93,7 @@ namespace ImageMorpher
 				ControlPoint.TOLERANCE = 0; 
 				ProjectPersistence loaded = (ProjectPersistence)deserializer.Deserialize(openFileStream);
 				loadSettings(loaded);
-				if (loaded.FrameSrcs.Count > 0) { 
+				if (loaded.FrameSrcs != null && loaded.FrameSrcs.Count > 0) { 
 					for (int i = 0; i < loaded.FrameSrcs.Count; i++)
 					{
 						BitmapSource bms = new BitmapImage(new Uri(@loaded.FrameSrcs[i]));
@@ -122,7 +122,7 @@ namespace ImageMorpher
 			morph.setDest((BitmapSource)destViewer.ImageSrc);
 			if (!morph.Morphed)
 			{
-				morph.setFrames((BitmapSource)srcViewer.ImageSrc);
+				morph.startThreads();
 			}
 			srcViewer.Visibility = Visibility.Hidden;
 			destViewer.Visibility = Visibility.Hidden;

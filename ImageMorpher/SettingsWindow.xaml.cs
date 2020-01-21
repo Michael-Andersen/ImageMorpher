@@ -100,6 +100,11 @@ namespace ImageMorpher
 			MorphViewer.FrameRate = (int)frameRateSlider.Value;
 		}
 
+		private void ThreadSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			Morpher.NumThreads = (int)threadSlider.Value;
+		}
+
 		private void LineColour_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			ControlLineVisual.LINE_COLOUR = (ControlLineVisual.Colour)((sender as ComboBox).SelectedItem);

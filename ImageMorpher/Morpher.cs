@@ -10,6 +10,7 @@ using System.Windows.Interop;
 using System.Windows;
 using System.Drawing.Imaging;
 using Point = System.Windows.Point;
+using System.Threading;
 
 namespace ImageMorpher
 {
@@ -23,6 +24,7 @@ namespace ImageMorpher
 		public List<ControlLine> DestLines { get; set; }
 		public static double A_VALUE = 0.01;
 		public static double B_VALUE = 2;
+		public static int NumThreads = 4;
 		public bool Morphed = false;
 		public string UUID;
 		public int index = 0;
@@ -79,18 +81,18 @@ namespace ImageMorpher
 			return coords;
 		}
 
-		public Bitmap createFrame(BitmapSource bms, int frameNum)
+		public Bitmap createFrame(int frameNum, Bitmap srcC, Bitmap destC)
 		{
-			Bitmap bm = bitmapfromSource(bms);
-			for (int i = 0; i < src.Width; i++)
+			Bitmap bm = new Bitmap(srcC.Width, srcC.Height);
+			for (int i = 0; i < srcC.Width; i++)
 			{
-				for (int j = 0; j < src.Height; j++)
+				for (int j = 0; j < srcC.Height; j++)
 				{
 					Point p = new Point(i, j);
-					Point srcCoords = getFrameCoords(SrcLines, p, frameNum);
-					Point destCoords = getFrameCoords(DestLines, p, NumFrames + 1 - frameNum);
-					Color srcColor = src.GetPixel((int)srcCoords.X, (int)srcCoords.Y);
-					Color destColor = dest.GetPixel((int)destCoords.X, (int)destCoords.Y);
+					Point srcCoords = getFrameCoords(SrcLines, p, frameNum, srcC);
+					Point destCoords = getFrameCoords(DestLines, p, NumFrames + 1 - frameNum, srcC);
+					Color srcColor = srcC.GetPixel((int)srcCoords.X, (int)srcCoords.Y);
+					Color destColor = destC.GetPixel((int)destCoords.X, (int)destCoords.Y);
 					int red = (int)(srcColor.R * ((NumFrames + 1.0 - frameNum) / (NumFrames + 1.0))
 						+ destColor.R * ((frameNum) / (NumFrames + 1.0))); 
 					int green = (int)(srcColor.G * ((NumFrames + 1.0 - frameNum) / (NumFrames + 1.0))
@@ -104,7 +106,7 @@ namespace ImageMorpher
 			return bm;
 		}
 
-		private Point getFrameCoords(List<ControlLine> lines, Point p, int frameNum)
+		private Point getFrameCoords(List<ControlLine> lines, Point p, int frameNum, Bitmap srcC)
 		{
 			double totalweights = 0;
 			Vector avgDelta = new Vector(0, 0);
@@ -119,25 +121,25 @@ namespace ImageMorpher
 				totalweights += weight;
 				avgDelta += (weight * (coords - p));
 			}
-			 return ensurePixel(p + avgDelta / totalweights);
+			 return ensurePixel(p + avgDelta / totalweights, srcC);
 		}
 
-		private Point ensurePixel(Point p)
+		private Point ensurePixel(Point p, Bitmap srcC)
 		{
 			if (p.X < 0)
 			{
 				p.X = 0;
-			} else if (p.X >= src.Width)
+			} else if (p.X >= srcC.Width)
 			{
-				p.X = src.Width - 1;
+				p.X = srcC.Width - 1;
 			}
 			if (p.Y < 0)
 			{
 				p.Y = 0;
 			}
-			else if (p.Y >= src.Height)
+			else if (p.Y >= srcC.Height)
 			{
-				p.Y = src.Height - 1;
+				p.Y = srcC.Height - 1;
 			}
 			return p;
 		}
@@ -156,29 +158,51 @@ namespace ImageMorpher
 			}
 		}
 
-		public void convertToSource(Bitmap bm)
+		public void convertToSource(Bitmap bm, int frameNum)
 		{
 				string path = "c:\\Users\\Mike\\Downloads\\" + UUID + "_" + index + ".png";
 				index++;
 				bm.Save(path, ImageFormat.Png);
-				Frames.Add(new BitmapImage(new Uri(path)));
+				BitmapImage bmi = new BitmapImage(new Uri(path));
+				bmi.Freeze();
+				Frames[frameNum - 1] = bmi;
 		}
 
-		public void setFrames(BitmapSource bms)
+		public void startThreads()
 		{
-			for (int i = 1; i <= NumFrames; i++)
+			Frames = new List<BitmapSource>(new BitmapSource[NumFrames]);
+			Thread[] threadArr = new Thread[NumThreads];
+			int NperThread = NumFrames / NumThreads;
+			for (int i = 0; i < NumThreads; i++)
 			{
-				Bitmap frame = createFrame(bms, i);
-				convertToSource(frame);
+				int start = NperThread * i;
+				if (i == (NumThreads - 1))
+				{
+					NperThread += (NumFrames - NperThread * NumThreads);
+
+				}
+				Bitmap srcC = new Bitmap(src);
+				Bitmap destC = new Bitmap(dest);
+				threadArr[i] = new Thread(() => setFrames(start, NperThread, srcC, destC));
+			}
+			for (int i = 0; i < NumThreads; i++)
+			{
+				threadArr[i].Start();
+			}
+			for (int i = 0; i < threadArr.Length; i++)
+			{
+				threadArr[i].Join();
 			}
 			Morphed = true;
 		}
 
-		public void getFrame(BitmapSource bms)
+		public void setFrames(int start, int NperThread, Bitmap srcC, Bitmap destC)
 		{
-			Bitmap frame = createFrame(bms, 1);
-			convertToSource(frame);
+			for (int i = start; i < start + NperThread; i++)
+			{
+				Bitmap frame = createFrame(i + 1, srcC, destC);
+				convertToSource(frame, i + 1);
+			}
 		}
-
 	}
 }
