@@ -27,7 +27,9 @@ namespace ImageMorpher
 		public SortedDictionary<ControlPoint, List<ControlLine>> DestControlDict { get; set; }
 		public string SrcImageFilename { get; set; }
 		public string DestImageFilename { get; set; }
-		public List<String> FrameSrcs { get; set; }
+		public string ProjectPath { get; set; }
+		public string ProjectName { get; set; }
+		public Dictionary<string, int> MorphNames { get; set; }
 
 	} 
 }

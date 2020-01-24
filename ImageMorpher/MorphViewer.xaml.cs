@@ -23,9 +23,10 @@ namespace ImageMorpher
 	{
 		public int FrameIndex { get; set;}
 		public static int FrameRate { get; set; }
-		public Morpher Morph { get; set;}
+		public Morph Mrph { get; set;}
 		public ImageSource Src { get; set;}
 		public ImageSource Dest { get; set;}
+		public Dictionary<string, Morph> morphDict { get; set; }
 		public bool playing = false;
 		public bool reversing = false;
 
@@ -33,11 +34,25 @@ namespace ImageMorpher
 		{
 			InitializeComponent();
 			FrameIndex = 0;
+			morphDict = new Dictionary<string, Morph>();
+			morphComboBox.ItemsSource = morphDict.Keys;
+		}
+
+		public void updateMorphs()
+		{
+			morphComboBox.ItemsSource = morphDict.Keys;
 		}
 
 		public void setImageSrc(ImageSource im)
 		{
 			image.Source = im;
+		}
+
+		private void MorphComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			FrameIndex = 0;
+			setImageSrc(Src);
+			Mrph = morphDict[(string)(morphComboBox.SelectedValue)];
 		}
 
 		private async void playBtn_Click(object sender, RoutedEventArgs e)
@@ -52,10 +67,10 @@ namespace ImageMorpher
 				{
 					Thread.Sleep(1000 / FrameRate);
 				});
-				for (; FrameIndex < Morph.Frames.Count; FrameIndex++)
+				for (; FrameIndex < Mrph.Frames.Count; FrameIndex++)
 				{
 					if (playing) {
-						setImageSrc(Morph.Frames[FrameIndex]);
+						setImageSrc(Mrph.Frames[FrameIndex]);
 						UpdateLayout();
 						await Task.Run(() =>
 						{
@@ -66,7 +81,7 @@ namespace ImageMorpher
 					}
 				}
 				if (playing) {
-					FrameIndex = Morph.Frames.Count - 1;
+					FrameIndex = Mrph.Frames.Count - 1;
 					setImageSrc(Dest);
 					UpdateLayout();
 					playBtn.Content = "Play";
@@ -87,20 +102,20 @@ namespace ImageMorpher
 			}
 			else
 			{
-				setImageSrc(Morph.Frames[FrameIndex]);
+				setImageSrc(Mrph.Frames[FrameIndex]);
 			}
 			
 			UpdateLayout();
 		}
 		private void nextBtn_Click(object sender, RoutedEventArgs e)
 		{
-			if (FrameIndex >= Morph.Frames.Count)
+			if (FrameIndex >= Mrph.Frames.Count)
 			{
 				setImageSrc(Dest);
 			}
 			else
 			{	
-				setImageSrc(Morph.Frames[FrameIndex]);
+				setImageSrc(Mrph.Frames[FrameIndex]);
 				FrameIndex++;
 			}
 			
@@ -114,7 +129,7 @@ namespace ImageMorpher
 		}
 		private void endBtn_Click(object sender, RoutedEventArgs e)
 		{
-			FrameIndex = Morph.Frames.Count - 1;
+			FrameIndex = Mrph.Frames.Count - 1;
 			setImageSrc(Dest);
 			UpdateLayout();
 		}
@@ -133,7 +148,7 @@ namespace ImageMorpher
 				{
 					if (reversing)
 					{
-						setImageSrc(Morph.Frames[FrameIndex]);
+						setImageSrc(Mrph.Frames[FrameIndex]);
 						UpdateLayout();
 						await Task.Run(() =>
 						{

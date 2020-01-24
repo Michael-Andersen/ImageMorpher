@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="ImageMorpher.PerformanceSettings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ImageMorpher"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" MinWidth="752" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" Grid.Row="0">
+            <Label>Number of Threads</Label>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="1">
+            <Slider IsSnapToTickEnabled="True"
+    TickFrequency="1" ValueChanged="ThreadSlider_ValueChanged" x:Name="threadSlider"  Maximum="8" Width ="100" Minimum="1" Value="4"></Slider>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="2">
+            <TextBox Text="{Binding ElementName=threadSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="threadBox"/>
+        </Grid>
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3">
+            <CheckBox x:Name="benchmarkBox"  IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					Enable Benchmarking
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="4">
+            <CheckBox x:Name="thread1Box" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					1 Thread
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="5">
+            <CheckBox x:Name="thread2Box" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					2 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="6">
+            <CheckBox x:Name="thread3Box" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					3 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1"  Grid.ColumnSpan="1" Grid.Row="7">
+            <CheckBox IsChecked="False" x:Name="thread4Box">
+                <WrapPanel>
+                    <TextBlock>
+					4 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1"  Grid.ColumnSpan="1" Grid.Row="8">
+            <CheckBox IsChecked="False" x:Name="thread5Box">
+                <WrapPanel>
+                    <TextBlock>
+					5 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="9">
+            <CheckBox x:Name="thread6Box" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					6 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="10">
+            <CheckBox IsChecked="False" x:Name="thread7Box">
+                <WrapPanel>
+                    <TextBlock>
+					7 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="11">
+            <CheckBox IsChecked="False" x:Name="thread8Box">
+                <WrapPanel>
+                    <TextBlock>
+					8 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -19,21 +19,17 @@ namespace ImageMorpher
 	{
 		Bitmap src;
 		Bitmap dest;
-		public List<BitmapSource> Frames { set; get; }
 		public List<ControlLine> SrcLines { get; set; }
 		public List<ControlLine> DestLines { get; set; }
 		public static double A_VALUE = 0.01;
 		public static double B_VALUE = 2;
+		public static string PROJECT_NAME;
+		public static string PROJECT_PATH;
 		public static int NumThreads = 4;
+		public Morph Mrph { get; set; }
 		public bool Morphed = false;
 		public string UUID;
 		public int index = 0;
-		public Morpher()
-		{
-			Frames = new List<BitmapSource>();
-			UUID = Guid.NewGuid().ToString();
-		}
-
 		public static int NumFrames { get; set; } = 1;
 		public Bitmap bitmapfromSource(BitmapSource bms)
 		{
@@ -160,30 +156,30 @@ namespace ImageMorpher
 
 		public void convertToSource(Bitmap bm, int frameNum)
 		{
-				string path = "c:\\Users\\Mike\\Downloads\\" + UUID + "_" + index + ".png";
-				index++;
+				string path = PROJECT_PATH + PROJECT_NAME + "\\" + Mrph.MorphName + "_" + (frameNum - 1) + ".png";
 				bm.Save(path, ImageFormat.Png);
-				BitmapImage bmi = new BitmapImage(new Uri(path));
+				BitmapImage bmi = LoadImage(path);
 				bmi.Freeze();
-				Frames[frameNum - 1] = bmi;
+				Mrph.Frames[frameNum - 1] = bmi;
 		}
 
 		public void startThreads()
 		{
-			Frames = new List<BitmapSource>(new BitmapSource[NumFrames]);
+			Mrph.Frames = new List<BitmapSource>(new BitmapSource[NumFrames]);
 			Thread[] threadArr = new Thread[NumThreads];
 			int NperThread = NumFrames / NumThreads;
 			for (int i = 0; i < NumThreads; i++)
 			{
 				int start = NperThread * i;
+				int amount = NperThread;
 				if (i == (NumThreads - 1))
 				{
-					NperThread += (NumFrames - NperThread * NumThreads);
+					amount += (NumFrames - NperThread * NumThreads);
 
 				}
 				Bitmap srcC = new Bitmap(src);
 				Bitmap destC = new Bitmap(dest);
-				threadArr[i] = new Thread(() => setFrames(start, NperThread, srcC, destC));
+				threadArr[i] = new Thread(() => setFrames(start, amount, srcC, destC));
 			}
 			for (int i = 0; i < NumThreads; i++)
 			{
@@ -196,9 +192,27 @@ namespace ImageMorpher
 			Morphed = true;
 		}
 
-		public void setFrames(int start, int NperThread, Bitmap srcC, Bitmap destC)
+		public static BitmapImage LoadImage(string filename)
 		{
-			for (int i = start; i < start + NperThread; i++)
+			BitmapImage myRetVal = null;
+			if (filename != null)
+			{
+				BitmapImage image = new BitmapImage();
+				using (FileStream stream = File.OpenRead(filename))
+				{
+					image.BeginInit();
+					image.CacheOption = BitmapCacheOption.OnLoad;
+					image.StreamSource = stream;
+					image.EndInit();
+				}
+				myRetVal = image;
+			}
+			return myRetVal;
+		}
+
+		public void setFrames(int start, int amount, Bitmap srcC, Bitmap destC)
+		{
+			for (int i = start; i < start + amount; i++)
 			{
 				Bitmap frame = createFrame(i + 1, srcC, destC);
 				convertToSource(frame, i + 1);

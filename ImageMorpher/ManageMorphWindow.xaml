@@ -1,0 +1,15 @@
+﻿<Window x:Class="ImageMorpher.ManageMorphWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageMorpher"
+        mc:Ignorable="d"
+        Title="ManageMorphWindow" Height="100" Width="400">
+    <Grid>
+        <Label Content="Morph:" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <ComboBox HorizontalAlignment="Center" Margin="71,26,201,21"  VerticalAlignment="Center" Width="120" IsSynchronizedWithCurrentItem="True" x:Name="morphComboBox" SelectedIndex="0" SelectionChanged="MorphComboBox_SelectionChanged">
+        </ComboBox>
+        <Button Content="Delete" Click="deleteBtn_Click" HorizontalAlignment="Left" Margin="272,28,0,0" VerticalAlignment="Top" Width="75"/>
+    </Grid>
+</Window>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,33 +10,24 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace ImageMorpher
 {
 	/// <summary>
-	/// Interaction logic for SettingsWindow.xaml
+	/// Interaction logic for MorphViewerSettings.xaml
 	/// </summary>
-	public partial class SettingsWindow : Window
+	public partial class MorphViewerSettings : UserControl
 	{
-
-		public bool OwnerClosing { get; set; } = false;
-
-
-		public SettingsWindow(ImageViewer srcViewer, ImageViewer destViewer)
+		public MorphViewerSettings()
 		{
 			InitializeComponent();
-			clSettings.SrcViewer = srcViewer;
-			clSettings.DestViewer = destViewer;
 		}
 
-		private void Settings_Closing(object sender, CancelEventArgs e)
+		private void FrameRateSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-			if (!OwnerClosing)
-			{
-				e.Cancel = true;
-				Hide();
-			}
+			MorphViewer.FrameRate = (int)frameRateSlider.Value;
 		}
 	}
 }

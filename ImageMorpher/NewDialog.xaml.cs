@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,28 +15,24 @@ using System.Windows.Shapes;
 namespace ImageMorpher
 {
 	/// <summary>
-	/// Interaction logic for SettingsWindow.xaml
+	/// Interaction logic for NewDialog.xaml
 	/// </summary>
-	public partial class SettingsWindow : Window
+	public partial class NewDialog : Window
 	{
+		public string MorphName { get; set; }
 
-		public bool OwnerClosing { get; set; } = false;
-
-
-		public SettingsWindow(ImageViewer srcViewer, ImageViewer destViewer)
+		public NewDialog()
 		{
 			InitializeComponent();
-			clSettings.SrcViewer = srcViewer;
-			clSettings.DestViewer = destViewer;
 		}
 
-		private void Settings_Closing(object sender, CancelEventArgs e)
+		public delegate void Ok_Handler(object sender, RoutedEventArgs args);
+
+		public event Ok_Handler OkEvent;
+
+		public void Ok_Click(object sender, RoutedEventArgs e)
 		{
-			if (!OwnerClosing)
-			{
-				e.Cancel = true;
-				Hide();
-			}
+			OkEvent(sender, e);
 		}
 	}
 }

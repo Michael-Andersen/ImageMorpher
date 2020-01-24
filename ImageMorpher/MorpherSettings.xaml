@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="ImageMorpher.MorpherSettings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ImageMorpher"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Grid.Row="0">
+            <Label>Number of Frames</Label>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="0">
+            <Slider IsSnapToTickEnabled="True"
+    TickFrequency="1" ValueChanged="FramesSlider_ValueChanged" x:Name="framesSlider"  Maximum="1000" Width ="100" Minimum="1" Value="10"></Slider>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="1">
+            <TextBox Text="{Binding ElementName=framesSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="framesBox"/>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="2">
+            <Label>A Value</Label>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="2">
+            <Slider ValueChanged="ASlider_ValueChanged" x:Name="ASlider"  Maximum="1" Width ="100" Minimum="0.0001" Value="0.01"></Slider>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="3">
+            <TextBox Text="{Binding ElementName=ASlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="ABox"/>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="4">
+            <Label>B Value</Label>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="4">
+            <Slider ValueChanged="BSlider_ValueChanged" x:Name="BSlider"  Maximum="2" Width ="100" Minimum="1" Value="2"></Slider>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="5">
+            <TextBox Text="{Binding ElementName=BSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="BBox"/>
+        </Grid>
+    </Grid>
+</UserControl>

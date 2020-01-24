@@ -38,6 +38,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -56,11 +57,34 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ControlLineSettings.xaml.cs">
+      <DependentUpon>ControlLineSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ControlLineVisual.cs" />
+    <Compile Include="ManageMorphWindow.xaml.cs">
+      <DependentUpon>ManageMorphWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Morph.cs" />
     <Compile Include="Morpher.cs" />
+    <Compile Include="MorpherSettings.xaml.cs">
+      <DependentUpon>MorpherSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MorphViewerSettings.xaml.cs">
+      <DependentUpon>MorphViewerSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="NewDialog.xaml.cs">
+      <DependentUpon>NewDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PerformanceSettings.xaml.cs">
+      <DependentUpon>PerformanceSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="ControlLineSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ImageViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -82,7 +106,27 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ManageMorphWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MorpherSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MorphViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MorphViewerSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="NewDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PerformanceSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
