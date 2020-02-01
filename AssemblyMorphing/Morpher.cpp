@@ -70,9 +70,9 @@ EXPORT BYTE* CreateFrame(BYTE* src, BYTE* dest, float* lines, BYTE* result, int 
 				INNERSTARTA : mov eax, [esi + 4]
 							  cmp ecx, eax
 							  jge INNERDONEA
-							  push ecx
+					 LASTODD: push ecx
 							  xor ecx, ecx
-							  add ecx, 144
+							  add ecx, 160
 							  xorps xmm6, xmm6
 							  movups[edi + 48], xmm6
 							  INNERSTARTB : mov eax, [esi + 8]
@@ -186,7 +186,7 @@ EXPORT BYTE* CreateFrame(BYTE* src, BYTE* dest, float* lines, BYTE* result, int 
 																				vshufps xmm3, xmm1, xmm1, 0xA0 //height x2 height x2 src
 																				vshufps xmm2, xmm1, xmm1, 0xF5// width x2 width x2 src
 																				movups xmm4, [edi + 96] // all 4s
-																				movups xmm1, [edi + 112]
+																				movups xmm1, [edi + 112] // get width constant
 																				mulps xmm3, xmm1
 																				addps xmm2, xmm3 //width x height
 																				mulps xmm2, xmm4 //pixel number src
@@ -238,12 +238,20 @@ EXPORT BYTE* CreateFrame(BYTE* src, BYTE* dest, float* lines, BYTE* result, int 
 																				xorps xmm1, xmm1
 																				xorps xmm7, xmm7
 																				jmp INNERSTARTA
-																				INNERDONEA : pop ecx
-																							 add ecx, 1
+																							INNERDONEA : vshufps xmm3, xmm0, xmm0, 0x55
+																							movups xmm5, [edi + 112]
+																							comiss xmm3, xmm5 //check if coord less than width
+																							jb FIXODD
+																							 
 																							 movups xmm1, [edi + 16]
 																							 addsubps xmm0, xmm1
 																							 xorps xmm1, xmm1
+																							 pop ecx
+																							 add ecx, 1
 																							 jmp START
+																							 FIXODD: movups xmm3, [edi + 144]
+																							 addps xmm0, xmm3 //fix coords for odd widths
+																							 jmp LASTODD
 																							 DONE : pop ebp
 																									pop edi
 																									pop esi
