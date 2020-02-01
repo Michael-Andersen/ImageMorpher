@@ -11,12 +11,18 @@ using System.Windows;
 using System.Drawing.Imaging;
 using Point = System.Windows.Point;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace ImageMorpher
 {
 
 	public class Morpher
 	{
+		[DllImport("AssemblyMorphing.dll", CallingConvention = CallingConvention.Cdecl)]
+		public static extern void SetSize(int ht, int sd, int lsz);
+		[DllImport("AssemblyMorphing.dll", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr CreateFrame(IntPtr src, IntPtr dest, IntPtr lines, IntPtr result, int frameNum, int numFrames);
+
 		Bitmap src;
 		Bitmap dest;
 		public List<ControlLine> SrcLines { get; set; }
@@ -46,6 +52,41 @@ namespace ImageMorpher
 		public void setSrc(BitmapSource bms)
 		{
 			src = bitmapfromSource(bms);
+
+			/*
+			BitmapData bmpdata = null;
+
+			try
+			{
+				bmpdata = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, src.PixelFormat);
+				int numbytes = bmpdata.Stride * src.Height;
+				byte[] bytedata = new byte[numbytes];
+				IntPtr ptr = bmpdata.Scan0;
+
+				Marshal.Copy(ptr, bytedata, 0, numbytes);
+				string g = "byte[] testValues = [";
+				File.AppendAllText(@"C:\Users\mike\Downloads\bitmap1.txt", g);
+				for (int i = 0; i < numbytes; i++)
+				{
+					string b = bytedata[i] + ", ";
+					File.AppendAllText(@"C:\Users\mike\Downloads\bitmap1.txt", b);
+				}
+				//g = g.Substring(0, g.Length - 2);
+				//g += "];";
+				TestFunc(ptr);
+
+			}
+			finally
+			{
+				if (bmpdata != null)
+					src.UnlockBits(bmpdata);
+			}
+
+			IntPtr ptr2 = TestFunc2();
+			Bitmap temp = new Bitmap(src.Width, src.Height, (src.Width * 4), src.PixelFormat, ptr2);
+			src = temp; */
+
+
 		}
 
 		public void setDest(BitmapSource bms)
@@ -179,7 +220,7 @@ namespace ImageMorpher
 				}
 				Bitmap srcC = new Bitmap(src);
 				Bitmap destC = new Bitmap(dest);
-				threadArr[i] = new Thread(() => setFrames(start, amount, srcC, destC));
+				threadArr[i] = new Thread(() => setFrames_SSE(start, amount, srcC, destC)); //changed to sse
 			}
 			for (int i = 0; i < NumThreads; i++)
 			{
@@ -208,6 +249,254 @@ namespace ImageMorpher
 				myRetVal = image;
 			}
 			return myRetVal;
+		}
+
+		public void setFrames_SSE(int start, int amount, Bitmap srcC, Bitmap destC) {
+
+			byte[] bytedataS;
+			byte[] bytedataD;
+			for (int i = start; i < start + amount; i++)
+			{
+				float[] lines = new float[36 + SrcLines.Count * 56];
+				lines[0] = 0;
+				lines[1] = 2;
+				lines[2] = 0;
+				lines[3] = 2;
+				lines[4] = -1;
+				lines[5] = -1 * (srcC.Width);
+				lines[6] = -1;
+				lines[7] = -1 * (srcC.Width);
+				lines[8] = (float)A_VALUE;
+				lines[9] = (float)A_VALUE;
+				lines[10] = (float)A_VALUE;
+				lines[11] = (float)A_VALUE;
+				lines[12] = 0;
+				lines[13] = 0;
+				lines[14] = 0;
+				lines[15] = 0;
+				lines[16] = 0;
+				lines[17] = 0;
+				lines[18] = 0;
+				lines[19] = 0;
+				lines[20] = srcC.Height - 1;
+				lines[21] = srcC.Width - 1;
+				lines[22] = srcC.Height - 1;
+				lines[23] = srcC.Width - 1;
+				lines[24] = 4;
+				lines[25] = 4;
+				lines[26] = 4;
+				lines[27] = 4;
+				lines[28] = srcC.Width;
+				lines[29] = srcC.Width;
+				lines[30] = srcC.Width;
+				lines[31] = srcC.Width;
+				lines[32] = 1;
+				lines[33] = 1;
+				lines[34] = 1;
+				lines[35] = 1;
+				int z = 0;
+				SetSize(srcC.Height, srcC.Width * 4, lines.Length);
+				for (int k = 0; k < SrcLines.Count; k++ )
+				{
+					ControlLine l = SrcLines[k];
+					lines[36 + z] = (float)l.StartPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.X;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.X;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.X;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.X;
+					z++;
+					lines[36 + z] = (float)l.Vect.Y;
+					z++;
+					lines[36 + z] = (float)l.Vect.X;
+					z++;
+					lines[36 + z] = (float)l.Vect.Y;
+					z++;
+					lines[36 + z] = (float)l.Vect.X;
+					z++;
+					lines[36 + z] = (float)(  l.Norm.Y/l.Norm.Length);
+					z++;
+					lines[36 + z] = (float)( l.Norm.X / l.Norm.Length);
+					z++;
+					lines[36 + z] = (float)( l.Norm.Y / l.Norm.Length);
+					z++;
+					lines[36 + z] = (float)(l.Norm.X / l.Norm.Length);
+					z++;
+					l = makeDestLine(l, i + 1);
+					lines[36 + z] = (float)l.StartPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.X;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.X;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.X;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.X;
+					z++;
+					lines[36 + z] = (float)l.Vect.Y;
+					z++;
+					lines[36 + z] = (float)l.Vect.X;
+					z++;
+					lines[36 + z] = (float)l.Vect.Y;
+					z++;
+					lines[36 + z] = (float)l.Vect.X;
+					z++;
+					lines[36 + z] = (float)(l.Norm.Y);
+					z++;
+					lines[36 + z] = (float)(l.Norm.X);
+					z++;
+					lines[36 + z] = (float)( l.Norm.Y);
+					z++;
+					lines[36 + z] = (float)(l.Norm.X);
+					z++;
+					lines[36 + z] = (float)l.Vect.Length;
+					z++;
+					lines[36 + z] = (float)l.Vect.Length;
+					z++;
+					lines[36 + z] = (float)l.Vect.Length;
+					z++;
+					lines[36 + z] = (float)l.Vect.Length;
+					z++;
+					lines[36 + z] = (float)l.Vect.LengthSquared;
+					z++;
+					lines[36 + z] = (float)l.Vect.LengthSquared;
+					z++;
+					lines[36 + z] = (float)l.Vect.LengthSquared;
+					z++;
+					lines[36 + z] = (float)l.Vect.LengthSquared;
+					z++;
+					l = SrcLines[k].Pair;
+					lines[36 + z] = (float)l.StartPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.X;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.StartPixel.X;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.X;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.Y;
+					z++;
+					lines[36 + z] = (float)l.EndPixel.X;
+					z++;
+					lines[36 + z] = (float)l.Vect.Y;
+					z++;
+					lines[36 + z] = (float)l.Vect.X;
+					z++;
+					lines[36 + z] = (float)l.Vect.Y;
+					z++;
+					lines[36 + z] = (float)l.Vect.X;
+					z++;
+					lines[36 + z] = (float)(l.Norm.Y / l.Norm.Length);
+					z++;
+					lines[36 + z] = (float)(l.Norm.X / l.Norm.Length);
+					z++;
+					lines[36 + z] = (float)(l.Norm.Y / l.Norm.Length);
+					z++;
+					lines[36 + z] = (float)(l.Norm.X / l.Norm.Length);
+					z++;
+				}
+				IntPtr linesPtr = Marshal.AllocHGlobal(Marshal.SizeOf(lines[0]) * lines.Length);
+				Marshal.Copy(lines, 0, linesPtr, lines.Length);
+				BitmapData bmpdataS = null;
+				BitmapData bmpdataD = null;
+				IntPtr Sptr;
+				IntPtr Dptr;
+				Bitmap srcIn = new Bitmap(srcC);
+				Bitmap destIn = new Bitmap(destC);
+				/*
+				for (int k = 0; k < srcC.Height; k++)
+				{
+					for (int j = 0; j < srcC.Width; j++)
+					{
+						Color srcColor = srcC.GetPixel(j, k);
+						int red = (int)Math.Round(srcColor.R * ((NumFrames + 1.0 - (i + 1)) / (NumFrames + 1.0)));
+						int green = (int)Math.Round(srcColor.G * ((NumFrames + 1.0 - (i + 1)) / (NumFrames + 1.0)));
+						int blue = (int)Math.Round(srcColor.B * ((NumFrames + 1.0 - (i + 1)) / (NumFrames + 1.0)));
+						int alpha = 255;
+						srcIn.SetPixel(j, k, Color.FromArgb(alpha, red, green, blue));
+						Color destColor = destC.GetPixel(j, k);
+						 red = (int)Math.Round(destColor.R * (i + 1) / (NumFrames + 1.0));
+						 green = (int)Math.Round(destColor.G * (i + 1) / (NumFrames + 1.0));
+						 blue = (int)Math.Round(destColor.B * (i + 1) / (NumFrames + 1.0));
+						destIn.SetPixel(j, k, Color.FromArgb(alpha, red, green, blue));
+					}
+				}*/
+				try
+				{
+					bmpdataS = srcIn.LockBits(new Rectangle(0, 0, srcC.Width, srcC.Height), ImageLockMode.ReadOnly, srcIn.PixelFormat);
+					bmpdataD = destIn.LockBits(new Rectangle(0, 0, srcC.Width, srcC.Height), ImageLockMode.ReadOnly, destIn.PixelFormat);
+					int numbytes = bmpdataS.Stride * srcC.Height;
+					bytedataS = new byte[numbytes];
+					bytedataD = new byte[numbytes];
+					Sptr = bmpdataS.Scan0;
+					Dptr = bmpdataD.Scan0;
+					Marshal.Copy(Sptr, bytedataS, 0, numbytes);
+					Marshal.Copy(Dptr, bytedataD, 0, numbytes);
+					double frameFactS = (NumFrames + 1.0 - (i + 1)) / (NumFrames + 1.0);
+					double frameFactD = ((i+1)/(NumFrames + 1.0));
+					//byte[] srcIn = new byte[numbytes];
+					//byte[] destIn = new byte[numbytes];
+					/*for (int j = 0; j < numbytes; j++)
+					{
+						/*if (j % 4 == 3)
+						{
+							bytedataD[j] = 0;
+							bytedataS[j] = 255;
+						}
+						else
+						{
+							bytedataD[j] = (byte)(bytedataD[j] * frameFactD);
+							bytedataS[j] = (byte)(bytedataS[j] * frameFactS);
+						}*/
+						//srcIn[j] = bytedataS[j];
+						//destIn[j] = bytedataD[j];
+					//}
+				
+					Sptr = Marshal.AllocHGlobal(numbytes * Marshal.SizeOf(bytedataS[0]));
+					Dptr = Marshal.AllocHGlobal(numbytes * Marshal.SizeOf(bytedataD[0]));
+					//Marshal.Copy(Sptr, srcIn, 0, numbytes);
+					Marshal.Copy(bytedataS, 0, Sptr, numbytes);
+					Marshal.Copy(bytedataD, 0, Dptr, numbytes);
+				}
+				finally
+				{
+					if (bmpdataS != null)
+						srcIn.UnlockBits(bmpdataS);
+					if (bmpdataD != null)
+						destIn.UnlockBits(bmpdataD);
+				}
+				byte[] results = new byte[srcC.Width * srcC.Height * 4];
+				IntPtr resultsIn = Marshal.AllocHGlobal(Marshal.SizeOf(results[0]) * results.Length);
+				IntPtr frm = CreateFrame(Sptr, Dptr, linesPtr, resultsIn, i+1, NumFrames);
+				//	int[] dbt = new int[3];
+				//	Marshal.Copy(frm, dbt, 0,3);
+				byte[] returned = new byte[srcC.Width * srcC.Height * 4];
+				Marshal.Copy(frm, returned, 0, srcC.Width * srcC.Height * 4);
+				Bitmap frame = new Bitmap(srcC.Width, srcC.Height, (srcC.Width * 4), srcIn.PixelFormat, frm);
+				convertToSource(frame, i + 1);
+				Marshal.FreeHGlobal(Sptr);
+				Marshal.FreeHGlobal(Dptr);
+				Marshal.FreeHGlobal(linesPtr);
+			}
 		}
 
 		public void setFrames(int start, int amount, Bitmap srcC, Bitmap destC)

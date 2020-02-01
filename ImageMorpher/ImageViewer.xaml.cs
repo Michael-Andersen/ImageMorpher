@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,6 +30,7 @@ namespace ImageMorpher
 			NewLine,
 			None
 		}
+
 		private EditState editState = EditState.None;
 		private ControlPoint prevEnd;
 		private ControlPoint prevMid;
