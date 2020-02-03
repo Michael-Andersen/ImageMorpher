@@ -8,5 +8,6 @@
 
 EXPORT VOID SetSize(int ht, int sd, int lsz);
 EXPORT BYTE* CreateFrame(BYTE* src, BYTE* dest, float* lines, 
-	BYTE* result, int frameNum, int numFrames);
-byte* cross_dissolve(byte** results, int size, int frameNum, int NumFrames);
+	 int frameNum, int numFrames);
+BYTE* cross_dissolve(BYTE** results, int size, int frameNum, int NumFrames);
+EXPORT VOID Free_Pointer(BYTE* ptr);

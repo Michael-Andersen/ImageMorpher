@@ -28,10 +28,12 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" MinWidth="752" />
+            <ColumnDefinition Width="Auto" MinWidth="92"  />
+            <ColumnDefinition Width="Auto" MinWidth="126"  />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0" Grid.Row="0">
             <Label>Number of Threads</Label>
@@ -43,7 +45,16 @@
         <Grid Grid.Column="0" Grid.Row="2">
             <TextBox Text="{Binding ElementName=threadSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" x:Name="threadBox"/>
         </Grid>
-        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3">
+        <Grid Grid.Column="0" Grid.Row="3">
+            <CheckBox x:Name="SSEBox"  IsChecked="True" Checked="SSEBox_Checked" Unchecked="SSEBox_Unchecked">
+                <WrapPanel>
+                    <TextBlock>
+					Enable SSE Optimization
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4">
             <CheckBox x:Name="benchmarkBox"  IsChecked="False">
                 <WrapPanel>
                     <TextBlock>
@@ -52,7 +63,7 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="4">
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="5">
             <CheckBox x:Name="thread1Box" IsChecked="False">
                 <WrapPanel>
                     <TextBlock>
@@ -61,7 +72,7 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="5">
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="6">
             <CheckBox x:Name="thread2Box" IsChecked="False">
                 <WrapPanel>
                     <TextBlock>
@@ -70,7 +81,7 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="6">
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="7">
             <CheckBox x:Name="thread3Box" IsChecked="False">
                 <WrapPanel>
                     <TextBlock>
@@ -79,7 +90,7 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1"  Grid.ColumnSpan="1" Grid.Row="7">
+        <Grid Grid.Column="1"  Grid.ColumnSpan="1" Grid.Row="8">
             <CheckBox IsChecked="False" x:Name="thread4Box">
                 <WrapPanel>
                     <TextBlock>
@@ -88,7 +99,7 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1"  Grid.ColumnSpan="1" Grid.Row="8">
+        <Grid Grid.Column="1"  Grid.ColumnSpan="1" Grid.Row="9">
             <CheckBox IsChecked="False" x:Name="thread5Box">
                 <WrapPanel>
                     <TextBlock>
@@ -97,7 +108,7 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="9">
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="10">
             <CheckBox x:Name="thread6Box" IsChecked="False">
                 <WrapPanel>
                     <TextBlock>
@@ -106,7 +117,7 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="10">
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="11">
             <CheckBox IsChecked="False" x:Name="thread7Box">
                 <WrapPanel>
                     <TextBlock>
@@ -115,11 +126,83 @@
                 </WrapPanel>
             </CheckBox>
         </Grid>
-        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="11">
+        <Grid Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="12">
             <CheckBox IsChecked="False" x:Name="thread8Box">
                 <WrapPanel>
                     <TextBlock>
 					8 Threads
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2" Grid.ColumnSpan="1" Grid.Row="5">
+            <CheckBox x:Name="thread1BoxSSE" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					1 Thread with SSE
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2" Grid.ColumnSpan="1" Grid.Row="6">
+            <CheckBox x:Name="thread2BoxSSE" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					2 Threads with SSE
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2" Grid.ColumnSpan="1" Grid.Row="7">
+            <CheckBox x:Name="thread3BoxSSE" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					3 Threads with SSE
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2"  Grid.ColumnSpan="1" Grid.Row="8">
+            <CheckBox IsChecked="False" x:Name="thread4BoxSSE">
+                <WrapPanel>
+                    <TextBlock>
+					4 Threads with SSE
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2"  Grid.ColumnSpan="1" Grid.Row="9">
+            <CheckBox IsChecked="False" x:Name="thread5BoxSSE">
+                <WrapPanel>
+                    <TextBlock>
+					5 Threads with SSE
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2" Grid.ColumnSpan="1" Grid.Row="10">
+            <CheckBox x:Name="thread6BoxSSE" IsChecked="False">
+                <WrapPanel>
+                    <TextBlock>
+					6 Threads with SSE
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2" Grid.ColumnSpan="1" Grid.Row="11">
+            <CheckBox IsChecked="False" x:Name="thread7BoxSSE">
+                <WrapPanel>
+                    <TextBlock>
+					7 Threads with SSE
+                    </TextBlock>
+                </WrapPanel>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Column="2" Grid.ColumnSpan="1" Grid.Row="12">
+            <CheckBox IsChecked="False" x:Name="thread8BoxSSE">
+                <WrapPanel>
+                    <TextBlock>
+					8 Threads with SSE
                     </TextBlock>
                 </WrapPanel>
             </CheckBox>

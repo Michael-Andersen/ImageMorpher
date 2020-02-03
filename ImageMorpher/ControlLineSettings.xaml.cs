@@ -40,6 +40,7 @@ namespace ImageMorpher
 			lineThicknessSlider.Value = lineThickness;
 			diameterSlider.Value = diameter;
 			toleranceSlider.Value = tolerance;
+			ControlPoint.TOLERANCE = toleranceSlider.Value;
 			lineComboBox.SelectedItem = lineColour;
 			startComboBox.SelectedItem = start;
 			middleComboBox.SelectedItem = middle;

@@ -18,23 +18,9 @@ EXPORT VOID SetSize(int ht, int sd, int lsz) {
 	lsize = lsz;
 } 
 
-EXPORT BYTE* CreateFrame(BYTE* src, BYTE* dest, float* lines, BYTE* result, int frameNum, int numFrames ) {
+EXPORT BYTE* CreateFrame(BYTE* src, BYTE* dest, float* lines, int frameNum, int numFrames ) {
 	int bwidth = stride * sizeof(src[0]);
 	int blsize = lsize * sizeof(lines[0]);
-	int bheight = height * sizeof(src[0]);
-	size_t debb = sizeof(byte*);
-	byte debugt1 = src[0];
-	byte debugt2 = src[1];
-	byte debugt3 = src[2];
-	byte debugt4 = src[3];
-	byte debugt5 = dest[0];
-	byte debugt6 = dest[1];
-	byte debugt7 = dest[2];
-	byte debugt8 = dest[3];
-	float debugt9 = lines[0];
-	float debugt10 = lines[1];
-	float debugt11 = lines[2];
-	float debugt12 = lines[3];
 	byte* result1 = (byte*)_aligned_malloc(sizeof(BYTE) * height * stride, 4);
 	byte* result2 = (byte*)_aligned_malloc(sizeof(BYTE) * height * stride, 4);
 	byte** results = (byte**)malloc(sizeof(BYTE*) * 2);
@@ -260,24 +246,26 @@ EXPORT BYTE* CreateFrame(BYTE* src, BYTE* dest, float* lines, BYTE* result, int 
 																									pop ebx
 																									pop eax
 	} 
-return cross_dissolve(results, sizeof(BYTE) * height * stride, frameNum, numFrames);
+	return cross_dissolve(results, sizeof(BYTE) * height * stride, frameNum, numFrames);
 }
 
-byte* cross_dissolve(byte** results, int size, int frameNum, int NumFrames) {
+BYTE* cross_dissolve(BYTE** results, int size, int frameNum, int NumFrames) {
 	for (int i = 0; i < size; i++) {
 		if (i > size) {
 			results[0][i] = 255;
 		}
 		else {
-			int dust = results[0][i];
-			int dust2 = results[1][i];
 			results[0][i] = ((results[0][i] * (NumFrames + 1.0 - frameNum) / (NumFrames + 1.0))
 				+ (results[1][i] * ((frameNum) / (NumFrames + 1.0))));
-			int deb = results[0][i];
-			int stop = 0;
 		}
 		
 	}
-	return results[0];
+	_aligned_free(results[1]);
+	byte * return_val = results[0];
+	free(results);
+	return return_val;
 }
 
+EXPORT VOID Free_Pointer(BYTE* ptr) {
+	_aligned_free(ptr);
+}

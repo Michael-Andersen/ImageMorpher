@@ -31,13 +31,13 @@
             Click="SetSrc_Click"/>
                     <MenuItem Header="Set Destination Image" 
             Click="SetDest_Click"/>
-                    <MenuItem x:Name="morphItem" Header="New Morph" 
+                    <MenuItem x:Name="morphItem" IsEnabled="False" Header="New Morph" 
             Click="NewMorph_Click"/>
-                    <MenuItem x:Name="modeItem" Header="View Morph" 
+                    <MenuItem x:Name="modeItem" IsEnabled="False" Header="View Morph" 
             Click="ViewMorph_Click"/>
                 <MenuItem x:Name="settingsItem" Header="Change Settings" 
             Click="Settings_Click"/>
-                    <MenuItem x:Name="manageItem" Header="Manage Morphs" 
+                    <MenuItem x:Name="manageItem" IsEnabled ="False" Header="Manage Morphs" 
             Click="ManageMorphs_Click"/>
                 </MenuItem>
             </Menu></Grid>

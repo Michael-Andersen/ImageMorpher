@@ -19,9 +19,11 @@ namespace ImageMorpher
 	public class Morpher
 	{
 		[DllImport("AssemblyMorphing.dll", CallingConvention = CallingConvention.Cdecl)]
+		public static extern void Free_Pointer(IntPtr ptr);
+		[DllImport("AssemblyMorphing.dll", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void SetSize(int ht, int sd, int lsz);
 		[DllImport("AssemblyMorphing.dll", CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr CreateFrame(IntPtr src, IntPtr dest, IntPtr lines, IntPtr result, int frameNum, int numFrames);
+		public static extern IntPtr CreateFrame(IntPtr src, IntPtr dest, IntPtr lines, int frameNum, int numFrames);
 
 		Bitmap src;
 		Bitmap dest;
@@ -32,11 +34,13 @@ namespace ImageMorpher
 		public static string PROJECT_NAME;
 		public static string PROJECT_PATH;
 		public static int NumThreads = 4;
+		public static bool SSE = true;
 		public Morph Mrph { get; set; }
 		public bool Morphed = false;
 		public string UUID;
 		public int index = 0;
 		public static int NumFrames { get; set; } = 1;
+
 		public Bitmap bitmapfromSource(BitmapSource bms)
 		{
 			using (MemoryStream outStream = new MemoryStream())
@@ -52,41 +56,6 @@ namespace ImageMorpher
 		public void setSrc(BitmapSource bms)
 		{
 			src = bitmapfromSource(bms);
-
-			/*
-			BitmapData bmpdata = null;
-
-			try
-			{
-				bmpdata = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, src.PixelFormat);
-				int numbytes = bmpdata.Stride * src.Height;
-				byte[] bytedata = new byte[numbytes];
-				IntPtr ptr = bmpdata.Scan0;
-
-				Marshal.Copy(ptr, bytedata, 0, numbytes);
-				string g = "byte[] testValues = [";
-				File.AppendAllText(@"C:\Users\mike\Downloads\bitmap1.txt", g);
-				for (int i = 0; i < numbytes; i++)
-				{
-					string b = bytedata[i] + ", ";
-					File.AppendAllText(@"C:\Users\mike\Downloads\bitmap1.txt", b);
-				}
-				//g = g.Substring(0, g.Length - 2);
-				//g += "];";
-				TestFunc(ptr);
-
-			}
-			finally
-			{
-				if (bmpdata != null)
-					src.UnlockBits(bmpdata);
-			}
-
-			IntPtr ptr2 = TestFunc2();
-			Bitmap temp = new Bitmap(src.Width, src.Height, (src.Width * 4), src.PixelFormat, ptr2);
-			src = temp; */
-
-
 		}
 
 		public void setDest(BitmapSource bms)
@@ -105,10 +74,10 @@ namespace ImageMorpher
 			double yStartfactor = frameNum * yStartChange / (NumFrames + 1.0);
 			double xEndfactor = frameNum * xEndChange / (NumFrames + 1.0);
 			double yEndfactor = frameNum * yEndChange / (NumFrames + 1.0);
-			int startPX = (int)(cl.StartPixel.X + xStartfactor);
-			int startPY = (int)(cl.StartPixel.Y + yStartfactor);
-			int endPX = (int)(cl.EndPixel.X + xEndfactor);
-			int endPY = (int)(cl.EndPixel.Y + yEndfactor);
+			int startPX = (int)Math.Round(cl.StartPixel.X + xStartfactor);
+			int startPY = (int)Math.Round(cl.StartPixel.Y + yStartfactor);
+			int endPX = (int)Math.Round(cl.EndPixel.X + xEndfactor);
+			int endPY = (int)Math.Round(cl.EndPixel.Y + yEndfactor);
 			return new ControlLine(new Point(startPX, startPY), new Point(endPX, endPY));
 		}
 
@@ -128,8 +97,8 @@ namespace ImageMorpher
 					Point p = new Point(i, j);
 					Point srcCoords = getFrameCoords(SrcLines, p, frameNum, srcC);
 					Point destCoords = getFrameCoords(DestLines, p, NumFrames + 1 - frameNum, srcC);
-					Color srcColor = srcC.GetPixel((int)srcCoords.X, (int)srcCoords.Y);
-					Color destColor = destC.GetPixel((int)destCoords.X, (int)destCoords.Y);
+					Color srcColor = srcC.GetPixel((int)Math.Round(srcCoords.X), (int)Math.Round(srcCoords.Y));
+					Color destColor = destC.GetPixel((int)Math.Round(destCoords.X), (int)Math.Round(destCoords.Y));
 					int red = (int)(srcColor.R * ((NumFrames + 1.0 - frameNum) / (NumFrames + 1.0))
 						+ destColor.R * ((frameNum) / (NumFrames + 1.0))); 
 					int green = (int)(srcColor.G * ((NumFrames + 1.0 - frameNum) / (NumFrames + 1.0))
@@ -166,7 +135,7 @@ namespace ImageMorpher
 			if (p.X < 0)
 			{
 				p.X = 0;
-			} else if (p.X >= srcC.Width)
+			} else if (p.X >= srcC.Width - 1)
 			{
 				p.X = srcC.Width - 1;
 			}
@@ -174,7 +143,7 @@ namespace ImageMorpher
 			{
 				p.Y = 0;
 			}
-			else if (p.Y >= srcC.Height)
+			else if (p.Y >= srcC.Height - 1)
 			{
 				p.Y = srcC.Height - 1;
 			}
@@ -220,8 +189,14 @@ namespace ImageMorpher
 				}
 				Bitmap srcC = new Bitmap(src);
 				Bitmap destC = new Bitmap(dest);
-				threadArr[i] = new Thread(() => setFrames_SSE(start, amount, srcC, destC)); //changed to sse
-			}
+				if (SSE)
+				{
+					threadArr[i] = new Thread(() => setFrames_SSE(start, amount, srcC, destC)); 
+				} else
+				{
+					threadArr[i] = new Thread(() => setFrames(start, amount, srcC, destC));
+				}
+				}
 			for (int i = 0; i < NumThreads; i++)
 			{
 				threadArr[i].Start();
@@ -239,12 +214,18 @@ namespace ImageMorpher
 			if (filename != null)
 			{
 				BitmapImage image = new BitmapImage();
-				using (FileStream stream = File.OpenRead(filename))
+				try
 				{
-					image.BeginInit();
-					image.CacheOption = BitmapCacheOption.OnLoad;
-					image.StreamSource = stream;
-					image.EndInit();
+					using (FileStream stream = File.OpenRead(filename))
+					{
+						image.BeginInit();
+						image.CacheOption = BitmapCacheOption.OnLoad;
+						image.StreamSource = stream;
+						image.EndInit();
+					}
+				} catch (FileNotFoundException e)
+				{
+
 				}
 				myRetVal = image;
 			}
@@ -425,12 +406,10 @@ namespace ImageMorpher
 				BitmapData bmpdataD = null;
 				IntPtr Sptr;
 				IntPtr Dptr;
-				Bitmap srcIn = new Bitmap(srcC);
-				Bitmap destIn = new Bitmap(destC);
 				try
 				{
-					bmpdataS = srcIn.LockBits(new Rectangle(0, 0, srcC.Width, srcC.Height), ImageLockMode.ReadOnly, srcIn.PixelFormat);
-					bmpdataD = destIn.LockBits(new Rectangle(0, 0, srcC.Width, srcC.Height), ImageLockMode.ReadOnly, destIn.PixelFormat);
+					bmpdataS = srcC.LockBits(new Rectangle(0, 0, srcC.Width, srcC.Height), ImageLockMode.ReadOnly, srcC.PixelFormat);
+					bmpdataD = destC.LockBits(new Rectangle(0, 0, srcC.Width, srcC.Height), ImageLockMode.ReadOnly, destC.PixelFormat);
 					int numbytes = bmpdataS.Stride * srcC.Height;
 					bytedataS = new byte[numbytes];
 					bytedataD = new byte[numbytes];
@@ -438,47 +417,22 @@ namespace ImageMorpher
 					Dptr = bmpdataD.Scan0;
 					Marshal.Copy(Sptr, bytedataS, 0, numbytes);
 					Marshal.Copy(Dptr, bytedataD, 0, numbytes);
-
-					//byte[] srcIn = new byte[numbytes];
-					//byte[] destIn = new byte[numbytes];
-					/*for (int j = 0; j < numbytes; j++)
-					{
-						/*if (j % 4 == 3)
-						{
-							bytedataD[j] = 0;
-							bytedataS[j] = 255;
-						}
-						else
-						{
-							bytedataD[j] = (byte)(bytedataD[j] * frameFactD);
-							bytedataS[j] = (byte)(bytedataS[j] * frameFactS);
-						}*/
-						//srcIn[j] = bytedataS[j];
-						//destIn[j] = bytedataD[j];
-					//}
-				
 					Sptr = Marshal.AllocHGlobal(numbytes * Marshal.SizeOf(bytedataS[0]));
 					Dptr = Marshal.AllocHGlobal(numbytes * Marshal.SizeOf(bytedataD[0]));
-					//Marshal.Copy(Sptr, srcIn, 0, numbytes);
 					Marshal.Copy(bytedataS, 0, Sptr, numbytes);
 					Marshal.Copy(bytedataD, 0, Dptr, numbytes);
 				}
 				finally
 				{
 					if (bmpdataS != null)
-						srcIn.UnlockBits(bmpdataS);
+						srcC.UnlockBits(bmpdataS);
 					if (bmpdataD != null)
-						destIn.UnlockBits(bmpdataD);
+						destC.UnlockBits(bmpdataD);
 				}
-				byte[] results = new byte[srcC.Width * srcC.Height * 4];
-				IntPtr resultsIn = Marshal.AllocHGlobal(Marshal.SizeOf(results[0]) * results.Length);
-				IntPtr frm = CreateFrame(Sptr, Dptr, linesPtr, resultsIn, i+1, NumFrames);
-				//	int[] dbt = new int[3];
-				//	Marshal.Copy(frm, dbt, 0,3);
-				byte[] returned = new byte[srcC.Width * srcC.Height * 4];
-				Marshal.Copy(frm, returned, 0, srcC.Width * srcC.Height * 4);
-				Bitmap frame = new Bitmap(srcC.Width, srcC.Height, (srcC.Width * 4), srcIn.PixelFormat, frm);
+				IntPtr frm = CreateFrame(Sptr, Dptr, linesPtr, i+1, NumFrames);
+				Bitmap frame = new Bitmap(srcC.Width, srcC.Height, (srcC.Width * 4), srcC.PixelFormat, frm);
 				convertToSource(frame, i + 1);
+				Free_Pointer(frm);
 				Marshal.FreeHGlobal(Sptr);
 				Marshal.FreeHGlobal(Dptr);
 				Marshal.FreeHGlobal(linesPtr);

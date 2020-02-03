@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace ImageMorpher
 	{
 		public string MorphName { get; set; }
 
+		public bool OwnerClosing { get; set; } = false;
+
 		public NewDialog()
 		{
 			InitializeComponent();
@@ -33,6 +36,11 @@ namespace ImageMorpher
 		public void Ok_Click(object sender, RoutedEventArgs e)
 		{
 			OkEvent(sender, e);
+		}
+
+		public void Cancel_Click(object sender, RoutedEventArgs e)
+		{
+			Close();
 		}
 	}
 }

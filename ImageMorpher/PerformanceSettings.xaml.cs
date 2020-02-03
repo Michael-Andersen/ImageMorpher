@@ -30,5 +30,15 @@ namespace ImageMorpher
 			Morpher.NumThreads = (int)threadSlider.Value;
 		}
 
+		private void SSEBox_Unchecked(object sender, RoutedEventArgs e)
+		{
+			Morpher.SSE = false;
+		}
+		
+
+		void SSEBox_Checked(object sender, RoutedEventArgs e)
+		{
+			Morpher.SSE = true;
+		}
 	}
 }

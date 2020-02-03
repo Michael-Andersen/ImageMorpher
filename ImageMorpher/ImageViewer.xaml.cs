@@ -181,10 +181,18 @@ namespace ImageMorpher
 				crop();
 			}
 			UpdateLayout();
+			canvas.Children.Clear();
 			foreach (ControlLine cl in ControlLines)
 			{
 				reDrawLine(cl);
 			}
+			double oldHeight = this.Height;
+			double oldWidth = this.Width;
+			this.Width = SystemParameters.PrimaryScreenWidth;
+			this.Height = SystemParameters.PrimaryScreenHeight;
+			UpdateLayout();
+			this.Width = oldWidth;
+			this.Height = oldHeight;
 		}
 
 		private void mouseDown(object sender, MouseButtonEventArgs e)
