@@ -62,7 +62,6 @@ namespace ImageMorpher
 					Directory.CreateDirectory(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME);
 					manageItem.IsEnabled = true;
 					morphItem.IsEnabled = true;
-					modeItem.IsEnabled = true;
 					newProjectDialog.Close();
 				}
 				
@@ -111,7 +110,10 @@ namespace ImageMorpher
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			if (openFileDialog.ShowDialog() == true)
 			{
+				Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
 				Stream openFileStream = File.OpenRead(openFileDialog.FileName);
+				srcViewer.image.Source = null;
+				destViewer.image.Source = null;
 				BinaryFormatter deserializer = new BinaryFormatter();
 				//must be temporarily set to 0 to ensure it's lower than saved tolerance due to sorted dictionary
 				ControlPoint.TOLERANCE = 0; 
@@ -130,7 +132,7 @@ namespace ImageMorpher
 						}
 						morph.MorphName = key;
 						morphViewer.morphDict.Add(key, morph);
-						//newMorphDialog.MorphName = key;
+						modeItem.IsEnabled = true;
 					}
 					
 				}
@@ -140,9 +142,13 @@ namespace ImageMorpher
 				destViewer.loadProject(loaded.DestControlLines, loaded.DestControlDict, 
 					loaded.DestImageFilename);
 				openFileStream.Close();
+				morphViewer.Src = srcViewer.ImageSrc;
+				morphViewer.Dest = destViewer.ImageSrc;
+				morphViewer.updateMorphs();
 				manageItem.IsEnabled = true;
 				morphItem.IsEnabled = true;
 				modeItem.IsEnabled = true;
+				Mouse.OverrideCursor = System.Windows.Input.Cursors.Arrow;
 			}
 		}
 
@@ -164,250 +170,257 @@ namespace ImageMorpher
 
 		private void NewMorph_Click(object sender, RoutedEventArgs e)
 		{
-			NewDialog newMorphDialog = new NewDialog();
-			string morphName = "";
-			bool readyToMorph = false;
-			newMorphDialog.OkEvent += (snd, args) =>
+			if (srcViewer.image == null || destViewer.image == null || srcViewer.ControlLines.Count == 0)
 			{
-				morphName = newMorphDialog.box.Text;
-				newMorphDialog.DialogResult = true;
-				newMorphDialog.Close();
-			};
-			if (newMorphDialog.ShowDialog() == true)
+				MessageBoxResult mbr = MessageBox.Show("You can't create a morph unless both source" +
+					"and destination images are set and there is at least one control line pair drawn", "",
+								MessageBoxButton.OK, MessageBoxImage.Stop);
+			}
+			else
 			{
-				if (!(bool)settings.performSettings.benchmarkBox.IsChecked)
+				NewDialog newMorphDialog = new NewDialog();
+				string morphName = "";
+				newMorphDialog.OkEvent += (snd, args) =>
 				{
+					morphName = newMorphDialog.box.Text;
+					newMorphDialog.DialogResult = true;
+					newMorphDialog.Close();
+				};
+				if (newMorphDialog.ShowDialog() == true)
+				{
+					if (!(bool)settings.performSettings.benchmarkBox.IsChecked)
+					{
 						Morph morph = new Morph();
 						morphViewer.morphDict.Add(morphName, morph);
 						morph.MorphName = morphName;
 						newMorph(morph);
-					
+						modeItem.IsEnabled = true;
 						MessageBoxResult mbr = MessageBox.Show("Morph Ready!", "",
 								MessageBoxButton.OK, MessageBoxImage.Information);
-				}
-				else
-				{
-					Dictionary<string, TimeSpan> times = new Dictionary<string, TimeSpan>();
-					Stopwatch sw = new Stopwatch();
-					string[] benchMarkKeys = new string[16] { "1 Thread", "2 Threads", "3 Threads",
+					}
+					else
+					{
+						Dictionary<string, TimeSpan> times = new Dictionary<string, TimeSpan>();
+						Stopwatch sw = new Stopwatch();
+						string[] benchMarkKeys = new string[16] { "1 Thread", "2 Threads", "3 Threads",
 				"4 Threads", "5 Threads", "6 Threads", "7 Threads", "8 Threads",
 				"1 Thread with SSE", "2 Threads with SSE", "3 Threads with SSE",
 				"4 Threads with SSE", "5 Threads with SSE", "6 Threads with SSE",
 					"7 Threads with SSE", "8 Threads with SSE"};
-					Morph morph = new Morph();
-					//newMorphDialog.ShowDialog();
-					morphViewer.morphDict.Add(morphName, morph);
-					morph.MorphName = morphName;
-					if ((bool)settings.performSettings.thread1Box.IsChecked)
-					{
-						Morpher.NumThreads = 1;
-						Morpher.SSE = false;
-						sw.Start();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[0], sw.Elapsed);
-						morph.MorphName = "BenchMark";
-					}
-					if ((bool)settings.performSettings.thread2Box.IsChecked)
-					{
-						Morpher.NumThreads = 2;
-						Morpher.SSE = false;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[1], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						Morph morph = new Morph();
+						morphViewer.morphDict.Add(morphName, morph);
+						morph.MorphName = morphName;
+						if ((bool)settings.performSettings.thread1Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 1;
+							Morpher.SSE = false;
+							sw.Start();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[0], sw.Elapsed);
+							morph.MorphName = "BenchMark";
 						}
-					}
-					if ((bool)settings.performSettings.thread3Box.IsChecked)
-					{
-						Morpher.NumThreads = 3;
-						Morpher.SSE = false;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[2], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread2Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 2;
+							Morpher.SSE = false;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[1], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread4Box.IsChecked)
-					{
-						Morpher.NumThreads = 4;
-						Morpher.SSE = false;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[3], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread3Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 3;
+							Morpher.SSE = false;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[2], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread5Box.IsChecked)
-					{
-						Morpher.NumThreads = 5;
-						Morpher.SSE = false;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[4], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread4Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 4;
+							Morpher.SSE = false;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[3], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread6Box.IsChecked)
-					{
-						Morpher.NumThreads = 6;
-						Morpher.SSE = false;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[5], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread5Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 5;
+							Morpher.SSE = false;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[4], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread7Box.IsChecked)
-					{
-						Morpher.NumThreads = 7;
-						Morpher.SSE = false;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[6], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread6Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 6;
+							Morpher.SSE = false;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[5], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread8Box.IsChecked)
-					{
-						Morpher.NumThreads = 8;
-						Morpher.SSE = false;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[7], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread7Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 7;
+							Morpher.SSE = false;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[6], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread1BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 1;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[8], sw.Elapsed);
-						morph.MorphName = "BenchMark";
-					}
-					if ((bool)settings.performSettings.thread2BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 2;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[9], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread8Box.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 8;
+							Morpher.SSE = false;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[7], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread3BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 3;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[10], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread1BoxSSE.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 1;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[8], sw.Elapsed);
+							morph.MorphName = "BenchMark";
 						}
-					}
-					if ((bool)settings.performSettings.thread4BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 4;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[11], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread2BoxSSE.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 2;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[9], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread5BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 5;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[12], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread3BoxSSE.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 3;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[10], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread6BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 6;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[13], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread4BoxSSE.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 4;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[11], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread7BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 7;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[14], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread5BoxSSE.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 5;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[12], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
-					if ((bool)settings.performSettings.thread8BoxSSE.IsChecked)
-					{
-						Morpher.NumThreads = 8;
-						Morpher.SSE = true;
-						sw.Restart();
-						newMorph(morph);
-						sw.Stop();
-						times.Add(benchMarkKeys[15], sw.Elapsed);
-						for (int i = 0; i < morph.Frames.Count; i++)
+						if ((bool)settings.performSettings.thread6BoxSSE.IsChecked)
 						{
-							File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							Morpher.NumThreads = 6;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[13], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
 						}
-					}
+						if ((bool)settings.performSettings.thread7BoxSSE.IsChecked)
+						{
+							Morpher.NumThreads = 7;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[14], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
+						}
+						if ((bool)settings.performSettings.thread8BoxSSE.IsChecked)
+						{
+							Morpher.NumThreads = 8;
+							Morpher.SSE = true;
+							sw.Restart();
+							newMorph(morph);
+							sw.Stop();
+							times.Add(benchMarkKeys[15], sw.Elapsed);
+							for (int i = 0; i < morph.Frames.Count; i++)
+							{
+								File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + morph.MorphName + "_" + i + ".png");
+							}
+						}
 
-					MessageBoxResult mbr = MessageBox.Show("Morph Ready!", "",
-							MessageBoxButton.OK, MessageBoxImage.Information);
-					foreach (string key in times.Keys)
-					{
-						double ratio = (double)times[benchMarkKeys[0]].Ticks / (double)times[key].Ticks;
-						MessageBoxResult mbr2 = MessageBox.Show(key + " / 1 Thread: " + ratio, "",
-							MessageBoxButton.OK, MessageBoxImage.Information);
+						MessageBoxResult mbr = MessageBox.Show("Morph Ready!", "",
+								MessageBoxButton.OK, MessageBoxImage.Information);
+						foreach (string key in times.Keys)
+						{
+							double ratio = (double)times[benchMarkKeys[0]].Ticks / (double)times[key].Ticks;
+							MessageBoxResult mbr2 = MessageBox.Show(key + " / 1 Thread: " + ratio, "",
+								MessageBoxButton.OK, MessageBoxImage.Information);
+						}
 					}
 				}
 			}
@@ -415,6 +428,7 @@ namespace ImageMorpher
 
 		private void newMorph(Morph mrph)
 		{
+			Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
 			morpher.Mrph = mrph;
 			morpher.SrcLines = srcViewer.ControlLines;
 			morpher.DestLines = destViewer.ControlLines;
@@ -422,6 +436,8 @@ namespace ImageMorpher
 			morpher.setDest((BitmapSource)destViewer.ImageSrc);
 			morpher.startThreads();
 			save();
+			morphViewer.updateMorphs();
+			Mouse.OverrideCursor = System.Windows.Input.Cursors.Arrow;
 		}
 		
 		private void ViewMorph_Click(object sender, RoutedEventArgs e )
@@ -432,7 +448,6 @@ namespace ImageMorpher
 				destViewer.Visibility = Visibility.Hidden;
 				morphViewer.updateMorphs();
 				morphViewer.Visibility = Visibility.Visible;
-				//morphViewer.Mrph = morphViewer.morphDict[newMorphDialog.MorphName];
 				morphViewer.Src = srcViewer.ImageSrc;
 				morphViewer.Dest = destViewer.ImageSrc;
 				morphViewer.setImageSrc(morphViewer.Src);

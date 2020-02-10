@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,7 +34,10 @@ namespace ImageMorpher
 
 		private void MorphComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			toBeDeleted = morphDict[(string)(morphComboBox.SelectedValue)];
+			if (morphComboBox.SelectedIndex > 0 && morphComboBox.SelectedIndex < morphDict.Count)
+			{
+				toBeDeleted = morphDict[(string)(morphComboBox.SelectedValue)];
+			}
 			
 		}
 
@@ -44,6 +48,15 @@ namespace ImageMorpher
 				File.Delete(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME + "\\" + toBeDeleted.MorphName + "_" + i + ".png");
 			}
 			morphDict.Remove(toBeDeleted.MorphName);
+			morphComboBox.ItemsSource = new List<string>();
+			morphComboBox.ItemsSource = morphDict.Keys;
+			morphComboBox.SelectedIndex = -1;
+			UpdateLayout();
+		}
+
+		private void ManageMorphs_Closing(object sender, CancelEventArgs e)
+		{
+			this.DialogResult = true;
 		}
 	}
 }

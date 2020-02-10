@@ -44,7 +44,7 @@
         </Grid>
         <Grid Grid.RowSpan="1" Grid.Row="1" Grid.Column="7" Grid.ColumnSpan="1">
             <Label Content="Morph:" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <ComboBox HorizontalAlignment="Right" Margin="10, 0, 10, 0"  VerticalAlignment="Center" Width="120" IsSynchronizedWithCurrentItem="True" x:Name="morphComboBox" SelectedIndex="0" SelectionChanged="MorphComboBox_SelectionChanged">
+            <ComboBox HorizontalAlignment="Right" Margin="10, 0, 10, 0"  VerticalAlignment="Center" Width="120" IsSynchronizedWithCurrentItem="True" x:Name="morphVComboBox" SelectedIndex="0" SelectionChanged="MorphVComboBox_SelectionChanged">
             </ComboBox>
         </Grid>
     </Grid>

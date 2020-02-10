@@ -35,12 +35,24 @@ namespace ImageMorpher
 			InitializeComponent();
 			FrameIndex = 0;
 			morphDict = new Dictionary<string, Morph>();
-			morphComboBox.ItemsSource = morphDict.Keys;
+			morphVComboBox.ItemsSource = morphDict.Keys;
 		}
 
 		public void updateMorphs()
 		{
-			morphComboBox.ItemsSource = morphDict.Keys;
+			morphVComboBox.ItemsSource = new List<String>();
+			morphVComboBox.ItemsSource = morphDict.Keys;
+			if (morphDict == null || morphDict.Count == 0)
+			{
+				morphVComboBox.SelectedIndex = -1;
+			}
+			else
+			{
+				morphVComboBox.SelectedIndex = morphDict.Count - 1;
+				Mrph = morphDict[(string)(morphVComboBox.SelectedValue)];
+			}
+			FrameIndex = 0;
+			UpdateLayout();
 		}
 
 		public void setImageSrc(ImageSource im)
@@ -48,11 +60,14 @@ namespace ImageMorpher
 			image.Source = im;
 		}
 
-		private void MorphComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void MorphVComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			FrameIndex = 0;
-			setImageSrc(Src);
-			Mrph = morphDict[(string)(morphComboBox.SelectedValue)];
+			if (morphVComboBox.SelectedIndex >= 0 && morphVComboBox.SelectedIndex < morphDict.Count)
+			{
+				FrameIndex = 0;
+				setImageSrc(Src);
+				Mrph = morphDict[(string)(morphVComboBox.SelectedValue)];
+			}
 		}
 
 		private async void playBtn_Click(object sender, RoutedEventArgs e)
@@ -109,14 +124,15 @@ namespace ImageMorpher
 		}
 		private void nextBtn_Click(object sender, RoutedEventArgs e)
 		{
-			if (FrameIndex >= Mrph.Frames.Count)
+			FrameIndex++;
+			if (FrameIndex > Mrph.Frames.Count - 1)
 			{
 				setImageSrc(Dest);
+				FrameIndex = Mrph.Frames.Count - 1;
 			}
 			else
 			{	
 				setImageSrc(Mrph.Frames[FrameIndex]);
-				FrameIndex++;
 			}
 			
 			UpdateLayout();
@@ -138,7 +154,6 @@ namespace ImageMorpher
 			if (!reversing) {
 				reverseBtn.Content = "Pause";
 				reversing = true;
-				//setImageSrc(Dest);
 				UpdateLayout();
 				await Task.Run(() =>
 				{
