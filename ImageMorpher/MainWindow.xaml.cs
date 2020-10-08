@@ -62,6 +62,8 @@ namespace ImageMorpher
 					Directory.CreateDirectory(Morpher.PROJECT_PATH + Morpher.PROJECT_NAME);
 					manageItem.IsEnabled = true;
 					morphItem.IsEnabled = true;
+					setsrcItem.IsEnabled = true;
+					setdestItem.IsEnabled = true;
 					newProjectDialog.Close();
 				}
 				
@@ -148,6 +150,8 @@ namespace ImageMorpher
 				manageItem.IsEnabled = true;
 				morphItem.IsEnabled = true;
 				modeItem.IsEnabled = true;
+				setsrcItem.IsEnabled = true;
+				setdestItem.IsEnabled = true;
 				Mouse.OverrideCursor = System.Windows.Input.Cursors.Arrow;
 			}
 		}

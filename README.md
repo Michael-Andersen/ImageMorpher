@@ -1,6 +1,15 @@
-IMAGE MORPHER
-COMP 4932 Assignment 1
-Michael Andersen A01030096
+# IMAGE MORPHER
+
+School project which implements the Beier–Neely morphing algorithm to create a "morphing" animation between two images.
+
+
+
+
+### Installation
+
+Build the AssemblyMorphing.dll and the ImageMorpher.exe
+
+### Example Usage
 
 To create a new morph:
 i. Click File/New Project

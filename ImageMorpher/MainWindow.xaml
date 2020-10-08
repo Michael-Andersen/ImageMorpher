@@ -27,9 +27,9 @@
             Click="OpenProject_Click"/>
                     <MenuItem Header="Save Project" 
             Click="SaveProject_Click"/>
-                    <MenuItem Header="Set Source Image" 
+                    <MenuItem Header="Set Source Image" x:Name="setsrcItem" IsEnabled="False"
             Click="SetSrc_Click"/>
-                    <MenuItem Header="Set Destination Image" 
+                    <MenuItem Header="Set Destination Image" x:Name="setdestItem" IsEnabled="False"
             Click="SetDest_Click"/>
                     <MenuItem x:Name="morphItem" IsEnabled="False" Header="New Morph" 
             Click="NewMorph_Click"/>
